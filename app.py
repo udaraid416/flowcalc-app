@@ -1,12 +1,148 @@
 import streamlit as st
 import streamlit.components.v1 as components
+import google.generativeai as genai
+from audio_recorder_streamlit import audio_recorder
+from gtts import gTTS
+import tempfile
+import os
+from PIL import Image
 
-# Page configurations
-st.set_page_config(page_title="FlowCalc Console", layout="wide", initial_sidebar_state="collapsed")
+# 1. API Key and AI Model Configuration using Streamlit Secrets
+try:
+    API_KEY = st.secrets["GEMINI_API_KEY"]
+    genai.configure(api_key=API_KEY)
+except KeyError:
+    st.warning("API Key not found! Please configure it in Streamlit Secrets.")
 
-# Read the HTML file
-with open("index.html", "r", encoding="utf-8") as f:
-    html_code = f.read()
+# System Prompt (instructing the bot to act as an expert and reply in Sinhala)
+system_instruction = """
+You are an experienced agricultural and farming expert in Sri Lanka. 
+Provide accurate, clear, and friendly advice to farmers and researchers regarding their crops (especially hydroponics, lettuce, etc.).
+You MUST provide all your answers and explanations entirely in the Sinhala language.
+If you receive an image or an audio snippet, analyze it and suggest remedies in Sinhala.
+"""
+model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=system_instruction)
 
-# Render HTML in Streamlit
-components.html(html_code, height=950, scrolling=True)
+# 2. Page configurations
+st.set_page_config(page_title="Smart Agri Console", layout="wide", initial_sidebar_state="collapsed")
+
+# 3. Read the HTML file (FlowCalc)
+try:
+    with open("index.html", "r", encoding="utf-8") as f:
+        html_code = f.read()
+except FileNotFoundError:
+    html_code = "<h3>Error! index.html file not found. Ensure it is in the same directory as app.py.</h3>"
+
+# 4. Create Tabs
+tab1, tab2 = st.tabs(["💧 FlowCalc Engine", "🤖 Agri-Assistant AI"])
+
+# --- TAB 1: FlowCalc Engine ---
+with tab1:
+    components.html(html_code, height=950, scrolling=True)
+
+# --- TAB 2: Agri-Assistant AI ---
+with tab2:
+    st.header("🌱 Agri-Assistant (AI Bot)")
+    st.write("Do you have an issue with your crops? Upload a photo of a diseased leaf, or ask your question using the microphone.")
+
+    # Initialize chat history
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("**📸 Provide an Image**")
+        img_file_buffer = st.camera_input("Take a photo")
+        uploaded_file = st.file_uploader("Or Upload an Image", type=["jpg", "jpeg", "png"])
+        
+        img_to_send = None
+        if img_file_buffer is not None:
+            img_to_send = Image.open(img_file_buffer)
+        elif uploaded_file is not None:
+            img_to_send = Image.open(uploaded_file)
+            
+        if img_to_send:
+            st.image(img_to_send, caption="Uploaded Image", use_container_width=True)
+
+    with col2:
+        st.markdown("**🎤 Ask via Microphone**")
+        audio_bytes = audio_recorder(text="Click to Record", recording_color="#e84118", neutral_color="#00a8ff")
+        
+    st.divider()
+    
+    # Display previous chat history
+    for msg in st.session_state.chat_history:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+
+    # Chat Input Box
+    user_query = st.chat_input("Type your question here...")
+    
+    # Check if a new audio is recorded
+    audio_query = False
+    if audio_bytes and "last_audio" not in st.session_state:
+        st.session_state.last_audio = audio_bytes
+        audio_query = True
+    elif audio_bytes and st.session_state.last_audio != audio_bytes:
+        st.session_state.last_audio = audio_bytes
+        audio_query = True
+
+    # Process if there is a text query, audio query, or image
+    if user_query or audio_query or img_to_send:
+        # Fallback prompt if user just uploads an image or audio without text
+        prompt_text = user_query if user_query else "Please analyze this audio or image and provide your answer in Sinhala."
+        
+        # Show user query
+        st.session_state.chat_history.append({"role": "user", "content": prompt_text})
+        with st.chat_message("user"):
+            st.markdown(prompt_text)
+
+        # Prepare contents for Gemini
+        contents = [prompt_text]
+        if img_to_send:
+            contents.append(img_to_send)
+        
+        if audio_bytes and audio_query:
+            # Save audio temporarily to send to AI
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_audio:
+                tmp_audio.write(audio_bytes)
+                tmp_audio_path = tmp_audio.name
+            try:
+                audio_file = genai.upload_file(path=tmp_audio_path)
+                contents.append(audio_file)
+            except Exception as e:
+                st.error("Error sending audio. Please type your question.")
+
+        # Get AI Response
+        with st.chat_message("assistant"):
+            with st.spinner("Analyzing... ⏳"):
+                try:
+                    response = model.generate_content(contents)
+                    bot_reply = response.text
+                    st.markdown(bot_reply)
+                    st.session_state.chat_history.append({"role": "assistant", "content": bot_reply})
+                    
+                    # Text to Speech (Speaking the Sinhala response)
+                    tts = gTTS(text=bot_reply, lang='si')
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_mp3:
+                        tts.save(tmp_mp3.name)
+                        st.audio(tmp_mp3.name, format="audio/mp3", autoplay=True)
+                        
+                except Exception as e:
+                    st.error(f"Sorry, an error occurred. Please check your API Key. ({e})")
+
+    # Downloadable Daily Log
+    if len(st.session_state.chat_history) > 0:
+        st.divider()
+        report_text = "Agri-Assistant Daily Report\n================================================\n\n"
+        for msg in st.session_state.chat_history:
+            role = "You" if msg["role"] == "user" else "AI Expert"
+            report_text += f"{role}: {msg['content']}\n\n"
+            
+        st.download_button(
+            label="📥 Download Daily Log",
+            data=report_text,
+            file_name="Agri_Report_Log.txt",
+            mime="text/plain"
+        )
