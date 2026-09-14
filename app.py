@@ -21,7 +21,8 @@ Provide accurate, clear, and friendly advice to farmers and researchers regardin
 You MUST provide all your answers and explanations entirely in the Sinhala language.
 If you receive an image or an audio snippet, analyze it and suggest remedies in Sinhala.
 """
-model = genai.GenerativeModel('gemini-1.5-flash', system_instruction=system_instruction)
+# MODEL NAME FIXED: Changed to gemini-1.5-flash-latest to avoid 404 error
+model = genai.GenerativeModel('gemini-1.5-flash-latest', system_instruction=system_instruction)
 
 # 2. Page configurations
 st.set_page_config(page_title="Smart Agri Console", layout="wide", initial_sidebar_state="collapsed")
