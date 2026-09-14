@@ -7,34 +7,52 @@ import tempfile
 import os
 from PIL import Image
 
-# 1. API Key and AI Model Configuration using Streamlit Secrets
+# ==========================================
+# 1. API KEY SETUP
+# ==========================================
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
     genai.configure(api_key=API_KEY)
 except KeyError:
-    st.warning("API Key not found! Please configure it in Streamlit Secrets.")
+    st.warning("API Key not found! Please configure GEMINI_API_KEY in Streamlit Secrets.")
 
-# System Prompt (instructing the bot to act as an expert and reply in Sinhala)
+# ==========================================
+# 2. DYNAMIC MODEL FETCHING (Error Fix)
+# ==========================================
+# වැඩ කරන අලුත්ම මොඩල් එක dynamically හොයාගැනීම 
+@st.cache_resource
+def get_working_model_name():
+    try:
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods and 'flash' in m.name.lower():
+                return m.name
+    except Exception as e:
+        pass
+    return "models/gemini-1.5-flash" # Fallback එක
+
+# System Prompt
 system_instruction = """
 You are an experienced agricultural and farming expert in Sri Lanka. 
 Provide accurate, clear, and friendly advice to farmers and researchers regarding their crops (especially hydroponics, lettuce, etc.).
 You MUST provide all your answers and explanations entirely in the Sinhala language.
 If you receive an image or an audio snippet, analyze it and suggest remedies in Sinhala.
 """
-# MODEL NAME FIXED: Changed to gemini-1.5-flash-latest to avoid 404 error
-model = genai.GenerativeModel('gemini-1.5-flash-latest', system_instruction=system_instruction)
 
-# 2. Page configurations
+# ==========================================
+# 3. PAGE CONFIGURATION
+# ==========================================
 st.set_page_config(page_title="Smart Agri Console", layout="wide", initial_sidebar_state="collapsed")
 
-# 3. Read the HTML file (FlowCalc)
+# Read HTML file for FlowCalc
 try:
     with open("index.html", "r", encoding="utf-8") as f:
         html_code = f.read()
 except FileNotFoundError:
     html_code = "<h3>Error! index.html file not found. Ensure it is in the same directory as app.py.</h3>"
 
-# 4. Create Tabs
+# ==========================================
+# 4. TABS CREATION
+# ==========================================
 tab1, tab2 = st.tabs(["💧 FlowCalc Engine", "🤖 Agri-Assistant AI"])
 
 # --- TAB 1: FlowCalc Engine ---
@@ -46,7 +64,6 @@ with tab2:
     st.header("🌱 Agri-Assistant (AI Bot)")
     st.write("Do you have an issue with your crops? Upload a photo of a diseased leaf, or ask your question using the microphone.")
 
-    # Initialize chat history
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
@@ -72,15 +89,12 @@ with tab2:
         
     st.divider()
     
-    # Display previous chat history
     for msg in st.session_state.chat_history:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-    # Chat Input Box
     user_query = st.chat_input("Type your question here...")
     
-    # Check if a new audio is recorded
     audio_query = False
     if audio_bytes and "last_audio" not in st.session_state:
         st.session_state.last_audio = audio_bytes
@@ -89,23 +103,19 @@ with tab2:
         st.session_state.last_audio = audio_bytes
         audio_query = True
 
-    # Process if there is a text query, audio query, or image
+    # Process Query
     if user_query or audio_query or img_to_send:
-        # Fallback prompt if user just uploads an image or audio without text
         prompt_text = user_query if user_query else "Please analyze this audio or image and provide your answer in Sinhala."
         
-        # Show user query
         st.session_state.chat_history.append({"role": "user", "content": prompt_text})
         with st.chat_message("user"):
             st.markdown(prompt_text)
 
-        # Prepare contents for Gemini
         contents = [prompt_text]
         if img_to_send:
             contents.append(img_to_send)
         
         if audio_bytes and audio_query:
-            # Save audio temporarily to send to AI
             with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_audio:
                 tmp_audio.write(audio_bytes)
                 tmp_audio_path = tmp_audio.name
@@ -115,25 +125,28 @@ with tab2:
             except Exception as e:
                 st.error("Error sending audio. Please type your question.")
 
-        # Get AI Response
         with st.chat_message("assistant"):
             with st.spinner("Analyzing... ⏳"):
                 try:
+                    # Initialize Model dynamically here!
+                    model_name = get_working_model_name()
+                    model = genai.GenerativeModel(model_name, system_instruction=system_instruction)
+                    
                     response = model.generate_content(contents)
                     bot_reply = response.text
                     st.markdown(bot_reply)
                     st.session_state.chat_history.append({"role": "assistant", "content": bot_reply})
                     
-                    # Text to Speech (Speaking the Sinhala response)
+                    # Text to Speech
                     tts = gTTS(text=bot_reply, lang='si')
                     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_mp3:
                         tts.save(tmp_mp3.name)
                         st.audio(tmp_mp3.name, format="audio/mp3", autoplay=True)
                         
                 except Exception as e:
-                    st.error(f"Sorry, an error occurred. Please check your API Key. ({e})")
+                    st.error(f"Sorry, an error occurred. System Error: {e}")
 
-    # Downloadable Daily Log
+    # Report Download
     if len(st.session_state.chat_history) > 0:
         st.divider()
         report_text = "Agri-Assistant Daily Report\n================================================\n\n"
