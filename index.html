@@ -29,24 +29,18 @@
   --water-a:       #38BDF8;
   --water-b:       #06B6D4;
   --water-c:       #0284C7;
-  --water-overflow-a: #EF4444;
-  --water-overflow-b: #F87171;
   --input-bg:      #FFFFFF;
   --input-border:  #CBD5E1;
   --input-focus:   rgba(14, 165, 233, 0.15);
   --tab-bg:        #F8FAFC;
   --tab-hover:     #F1F5F9;
   --readout-bg:    #F8FAFC;
-  --readout-hover: #F1F5F9;
   --tank-fill:     #F8FAFC;
   --tank-outline:  #CBD5E1;
-  --glass-1:       rgba(255, 255, 255, 0.7);
-  --glass-2:       rgba(255, 255, 255, 0.1);
-  --radius-lg: 20px;
-  --radius-md: 14px;
-  --radius-sm: 10px;
-  --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.02);
-  --panel-shadow-hover: 0 20px 40px -12px rgba(0, 0, 0, 0.12);
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   --font-ui: 'Space Grotesk', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
 }
@@ -56,134 +50,99 @@ html[data-theme="dark"] {
   --bg:            #060B14;
   --bg-grid:       #0A1220;
   --panel:         rgba(18,28,44,0.72);
-  --panel-solid:   #101B2C;
   --panel-border:  rgba(101,168,204,0.18);
   --panel-border-strong: rgba(101,168,204,0.34);
   --text:          #E8F1F8;
   --text-dim:      #7E93A8;
   --text-faint:    #4C6178;
   --teal:          #2CE0C9;
-  --teal-dim:      #1B7A6E;
   --input-bg:      rgba(6,11,20,0.4);
   --input-border:  var(--panel-border-strong);
-  --input-focus:   rgba(44,224,201,0.15);
   --tab-bg:        rgba(127,147,168,0.05);
-  --tab-hover:     rgba(127,147,168,0.1);
   --readout-bg:    rgba(127,147,168,0.05);
-  --readout-hover: rgba(127,147,168,0.08);
   --tank-fill:     rgba(127,147,168,0.06);
   --tank-outline:  var(--panel-border-strong);
-  --glass-1:       rgba(255, 255, 255, 0.15);
-  --glass-2:       rgba(255, 255, 255, 0.01);
-  --shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-  --panel-shadow-hover: 0 30px 60px -15px rgba(0,0,0,0.6);
 }
 
 *{ box-sizing:border-box; }
-html, body { margin: 0; padding: 0; width: 100%; max-width: 100vw; overflow-x: hidden; }
+html, body { margin: 0; padding: 0; width: 100%; overflow-x: hidden; }
 
 body{
-  background: radial-gradient(circle at 15% 0%, rgba(14, 165, 233, 0.06), transparent 45%), radial-gradient(circle at 100% 20%, rgba(6, 182, 212, 0.04), transparent 40%), var(--bg);
-  background-attachment: fixed; color: var(--text); font-family: var(--font-ui); min-height: 100vh;
+  background: var(--bg);
+  color: var(--text); font-family: var(--font-ui); min-height: 100vh;
   -webkit-font-smoothing: antialiased; transition: background-color .4s ease, color .4s ease;
 }
 body::before{
   content:""; position:fixed; inset:0;
   background-image: linear-gradient(var(--bg-grid) 1px, transparent 1px), linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
-  background-size: 40px 40px; opacity:.6; pointer-events:none; z-index:0;
+  background-size: 40px 40px; opacity:.6; pointer-events:none; z-index:-1;
 }
-::selection{ background: var(--teal); color:#fff; }
+
 button, select, input{ font-family: inherit; }
-a{ color: var(--teal); }
 button:focus-visible, select:focus-visible, input:focus-visible{ outline: 2px solid var(--teal); outline-offset: 2px; }
 
-.wrap{ position:relative; z-index:1; max-width:1100px; width: 100%; margin:0 auto; padding: 20px 20px 60px; overflow-x: hidden;}
-.topbar{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding: 16px 20px; border:1px solid var(--panel-border); background: var(--panel); backdrop-filter: blur(20px); border-radius: var(--radius-lg); margin-bottom: 24px; box-shadow: var(--shadow); width: 100%;}
-.brand{ display:flex; align-items:center; gap:14px; }
-.brand-mark{ width:44px; height:44px; border-radius:12px; background: linear-gradient(135deg, var(--water-b), var(--water-a)); display:flex; align-items:center; justify-content:center; box-shadow: 0 0 0 1px rgba(255,255,255,0.4) inset, 0 8px 16px -4px rgba(14, 165, 233, 0.4); flex-shrink:0;}
-.brand-mark svg{ width:24px; height:24px; color: #fff; }
-.brand-text .eyebrow{ font-family: var(--font-mono); font-size:10.5px; letter-spacing:.15em; color: var(--teal); text-transform:uppercase; font-weight: 700;}
-.brand-text h1{ margin:0; font-size:20px; font-weight:700; letter-spacing:-.01em; color: var(--text); }
-.controls-row{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+.wrap{ position:relative; z-index:1; max-width:1100px; width: 100%; margin:0 auto; padding: 15px 15px 60px; }
+.topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px; padding: 12px 16px; border:1px solid var(--panel-border); background: var(--panel); border-radius: var(--radius-lg); margin-bottom: 20px; box-shadow: var(--shadow); }
+.brand{ display:flex; align-items:center; gap:10px; }
+.brand-mark{ width:36px; height:36px; border-radius:10px; background: linear-gradient(135deg, var(--water-b), var(--water-a)); display:flex; align-items:center; justify-content:center; }
+.brand-mark svg{ width:20px; height:20px; color: #fff; }
+.brand-text .eyebrow{ font-family: var(--font-mono); font-size:9px; letter-spacing:.1em; color: var(--teal); text-transform:uppercase; font-weight: 700;}
+.brand-text h1{ margin:0; font-size:18px; font-weight:700; color: var(--text); }
+.controls-row{ display:flex; align-items:center; gap:8px; }
 
 .segmented{ display:inline-flex; background: var(--tab-bg); border:1px solid var(--panel-border); border-radius: 999px; padding:4px; gap:2px; }
-.segmented button{ border:none; background:transparent; color:var(--text-dim); padding:8px 16px; border-radius:999px; font-size:13px; font-weight:700; font-family: var(--font-mono); cursor:pointer; transition: all .2s ease;}
-.segmented button.active{ background: var(--teal); color:#fff; box-shadow: 0 4px 12px -2px var(--teal-dim); }
-.segmented button:hover:not(.active){ color:var(--text); background: var(--tab-hover);}
+.segmented button{ border:none; background:transparent; color:var(--text-dim); padding:6px 12px; border-radius:999px; font-size:12px; font-weight:700; font-family: var(--font-mono); cursor:pointer; }
+.segmented button.active{ background: var(--teal); color:#fff; }
 
-.icon-btn{ width:44px; height:44px; border-radius:12px; border:1px solid var(--panel-border); background: var(--tab-bg); color: var(--text-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; transition: all .2s ease;}
-.icon-btn:hover{ border-color: var(--panel-border-strong); background: var(--tab-hover); color: var(--text); transform: translateY(-1px);}
-.icon-btn svg{ width:20px; height:20px; }
+.icon-btn{ width:36px; height:36px; border-radius:10px; border:1px solid var(--panel-border); background: var(--tab-bg); color: var(--text-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; }
+.icon-btn svg{ width:18px; height:18px; }
 
-.grid{ display:grid; grid-template-columns: 1fr 1fr; gap:24px; align-items:start; width: 100%; }
-.panel{ border:1px solid var(--panel-border); background: var(--panel); backdrop-filter: blur(20px); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 24px; margin-bottom: 24px; transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease; width: 100%;}
-.panel:hover { box-shadow: var(--panel-shadow-hover); }
-.panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:24px; }
-.panel-head .tag{ font-family:var(--font-mono); font-size:10.5px; letter-spacing:.15em; text-transform:uppercase; color:var(--teal); font-weight: 700; margin-bottom: 4px;}
-.panel-head h2{ margin:0; font-size:19px; font-weight:700; }
+.grid{ display:grid; grid-template-columns: 1fr 1fr; gap:20px; align-items:start; }
+.panel{ border:1px solid var(--panel-border); background: var(--panel); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 20px; margin-bottom: 20px; }
+.panel-head{ display:flex; align-items:baseline; justify-content:space-between; margin-bottom:16px; }
+.panel-head .tag{ font-family:var(--font-mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--teal); font-weight: 700;}
+.panel-head h2{ margin:0; font-size:17px; font-weight:700; }
 
-.field{ margin-bottom:18px; }
-.field label{ display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--text-dim); margin-bottom:8px; font-weight:600; letter-spacing:.02em; }
-.field label .unit-tag{ font-family:var(--font-mono); font-size:10px; color:var(--text-faint); background:var(--tab-bg); border: 1px solid var(--panel-border); padding:3px 6px; border-radius:6px; font-weight: 700;}
-.field select, .field input[type="text"], .field input[type="number"]{ width:100%; padding:14px 16px; border-radius: var(--radius-sm); border:1px solid var(--input-border); background: var(--input-bg); color: var(--text); font-size:16px; font-family: var(--font-mono); font-weight:600; transition: all .2s ease;}
-.field select:focus, .field input:focus{ border-color: var(--teal); box-shadow: 0 0 0 4px var(--input-focus); outline:none; }
-.field .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.field{ margin-bottom:14px; }
+.field label{ display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--text-dim); margin-bottom:6px; font-weight:600; }
+.field label .unit-tag{ font-family:var(--font-mono); font-size:10px; color:var(--text-faint); background:var(--tab-bg); border: 1px solid var(--panel-border); padding:2px 5px; border-radius:4px;}
+.field select, .field input[type="text"], .field input[type="number"]{ width:100%; padding:12px; border-radius: var(--radius-sm); border:1px solid var(--input-border); background: var(--input-bg); color: var(--text); font-size:15px; font-family: var(--font-mono); font-weight:600;}
+.field select:focus, .field input:focus{ border-color: var(--teal); box-shadow: 0 0 0 3px var(--input-focus); outline:none; }
+.field .row2{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
 
-.divider{ height:1px; background: var(--panel-border); margin: 24px 0; border:none; }
-.shape-tabs{ display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-bottom:24px; }
-.shape-tab{ border:1px solid var(--panel-border); background: var(--tab-bg); border-radius: var(--radius-md); padding:16px 8px; cursor:pointer; text-align:center; color: var(--text-dim); transition: all .2s ease;}
-.shape-tab svg{ width:28px; height:28px; margin-bottom:8px; transition: transform .2s ease; }
-.shape-tab span{ display:block; font-size:12px; font-weight:700; letter-spacing:.02em; }
-.shape-tab.active{ border-color: var(--teal); color: var(--teal); background: var(--input-focus); box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.2) inset; }
+.shape-tabs{ display:grid; grid-template-columns: repeat(3,1fr); gap:8px; margin-bottom:20px; }
+.shape-tab{ border:1px solid var(--panel-border); background: var(--tab-bg); border-radius: var(--radius-md); padding:12px 4px; cursor:pointer; text-align:center; color: var(--text-dim); }
+.shape-tab svg{ width:24px; height:24px; margin-bottom:4px; }
+.shape-tab span{ display:block; font-size:11px; font-weight:700; }
+.shape-tab.active{ border-color: var(--teal); color: var(--teal); background: var(--input-focus); }
 
-.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:14px 20px; border-radius: var(--radius-sm); border:1px solid transparent; font-weight:700; font-size:15px; cursor:pointer; transition: all .2s ease; width:100%; min-height: 52px;}
-.btn-ghost{ background: var(--tab-bg); border-color: var(--panel-border); color: var(--text); }
-.btn-ghost:hover{ background: var(--tab-hover); border-color: var(--panel-border-strong); transform: translateY(-1px); }
+.viz-stage{ display:flex; align-items:center; justify-content:center; padding: 10px 0; }
+.viz-svg-holder{ position:relative; width:200px; max-width:100%; filter: drop-shadow(0 10px 20px rgba(14, 165, 233, 0.15));}
+.viz-svg-holder svg{ width:100%; height:auto; display:block; }
 
-.saved-row{ display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius: var(--radius-sm); background: var(--tab-bg); border:1px solid var(--panel-border); margin-bottom:8px;}
-.saved-row .name{ flex:1; font-size:14px; font-weight:700;}
-.saved-row button{ border:none; background:rgba(127,147,168,0.1); color:var(--text-dim); padding:10px; border-radius:8px; cursor:pointer;}
-.empty-note{ font-size:13px; color: var(--text-faint); padding:12px; text-align: center;}
-
-.viz-stage{ display:flex; align-items:center; justify-content:center; padding: 10px 0 20px; position: relative;}
-.viz-svg-holder{ position:relative; width:220px; filter: drop-shadow(0 15px 30px rgba(14, 165, 233, 0.15));}
-.viz-svg-holder svg{ width:100%; height:auto; display:block; overflow:visible; }
-
-.readout-grid{ display:grid; grid-template-columns: 1fr; gap:16px; margin-top:20px; width: 100%;}
-.readout{ border:1px solid var(--panel-border); border-radius: var(--radius-md); background: var(--readout-bg); padding:24px; text-align: center;}
-.readout .label{ font-size:12px; text-transform:uppercase; letter-spacing:.15em; color:var(--text-faint); font-weight:700; margin-bottom: 12px;}
-.readout .value{ font-family: var(--font-mono); font-size:42px; font-weight:700; color:var(--text);}
-.readout .value .unit{ font-size:16px; color: var(--text-dim); margin-left:6px; font-weight: 600;}
+.readout{ border:1px solid var(--panel-border); border-radius: var(--radius-md); background: var(--readout-bg); padding:16px; text-align: center; margin-top:16px;}
+.readout .label{ font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-faint); font-weight:700; margin-bottom: 8px;}
+.readout .value{ font-family: var(--font-mono); font-size:36px; font-weight:700; color:var(--text);}
+.readout .value .unit{ font-size:14px; color: var(--text-dim); margin-left:4px;}
 .readout.accent { border-color: rgba(14, 165, 233, 0.4); background: var(--input-focus); }
 .readout.accent .value{ color: var(--teal); }
 
-.status-banner{ display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius: var(--radius-md); font-size:14px; font-weight:600; margin-top:24px; border:1px solid transparent;}
+.status-banner{ display:flex; align-items:center; padding:12px; border-radius: var(--radius-md); font-size:13px; font-weight:600; margin-top:16px; border:1px solid transparent; text-align:center; justify-content:center;}
 .status-banner.ok{ background: var(--input-focus); border-color: rgba(14, 165, 233, 0.3); color: var(--teal-dim); }
 .status-banner.overflow{ background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: var(--red); }
-.status-banner.error{ background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); color: var(--red); }
 
-.water-group { transition: transform 1.5s cubic-bezier(0.25, 1.2, 0.5, 1); transform-origin: bottom;}
-.wave-a { animation: waveScroll 3.5s infinite; opacity: 0.95; }
-.wave-b { animation: waveScroll 5.5s infinite reverse; opacity: 0.6; }
-.wave-c { animation: waveScroll 7s linear infinite; opacity: 0.35; transform: scaleY(1.2); }
-@keyframes waveScroll{ from{ transform: translateX(0); } to{ transform: translateX(-80px); } }
-.bubble { fill: rgba(255, 255, 255, 0.7); animation: rise 3s infinite; }
-@keyframes rise { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-160px) scale(0.8); opacity: 0; } }
-
-.target-line{ transition: y 1.2s cubic-bezier(0.25, 1.2, 0.5, 1); }
-.mode-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding: 16px; background: var(--tab-bg); border-radius: var(--radius-md); border: 1px solid var(--panel-border);}
-.switch{ position:relative; width:52px; height:28px; }
-.switch input{ opacity:0; width:0; height:0; position:absolute; }
-.switch .track{ position:absolute; inset:0; background: var(--panel-border-strong); border-radius:999px; cursor:pointer; }
-.switch .thumb{ position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition: transform .3s; }
-.switch input:checked + .track{ background: var(--teal); }
-.switch input:checked + .track .thumb{ transform: translateX(24px); }
-
-@media (max-width: 940px){ .grid{ grid-template-columns: 1fr; gap: 20px; } }
-@media (max-width: 600px){
-  .wrap { padding: 12px 12px 40px; }
-  .topbar { flex-direction: column; align-items: flex-start; }
-  .readout .value { font-size: 36px; }
+/* MOBILE RESPONSIVE TWEAKS */
+@media (max-width: 768px){ 
+  .grid{ grid-template-columns: 1fr; gap: 15px; } 
+  .wrap { padding: 10px 10px 40px; }
+  .panel { padding: 16px; margin-bottom: 15px;}
+  .topbar { flex-direction: column; align-items: stretch; gap: 12px;}
+  .controls-row { justify-content: space-between; }
+  .segmented { display: flex; width: 100%; }
+  .segmented button { flex: 1; }
+  .readout .value { font-size: 32px; }
+  .field select, .field input[type="text"], .field input[type="number"]{ height: 48px; }
+  #requiredLiters, #requiredHeight { font-size: 20px !important; }
 }
 </style>
 </head>
@@ -211,8 +170,7 @@ button:focus-visible, select:focus-visible, input:focus-visible{ outline: 2px so
         <div class="panel-head"><div><div class="tag">01 · Tank Profile</div><h2>Select Tank Details</h2></div></div>
         <div class="field"><label>Brand</label><select id="brandSelect"></select></div>
         <div class="field" id="capacityField"><label>Standard Capacity</label><select id="capacitySelect"></select></div>
-        <div class="field" id="savedTankField" style="display:none;"><label>Load Saved</label><select id="savedTankSelect"></select></div>
-        <hr class="divider">
+        <hr class="divider" style="background:var(--panel-border); height:1px; border:none; margin:16px 0;">
         <div class="shape-tabs" id="shapeTabs">
           <div class="shape-tab active" data-shape="vertical"><span>VERTICAL</span></div>
           <div class="shape-tab" data-shape="tapered"><span>TAPERED</span></div>
@@ -238,18 +196,6 @@ button:focus-visible, select:focus-visible, input:focus-visible{ outline: 2px so
             <div><label>Length <span class="unit-tag" data-unit-label>CM</span></label><input type="number" id="h_length"></div>
           </div>
         </div>
-        <hr class="divider">
-        <div class="mode-row">
-          <div><div style="font-weight:700;">Outer Measured?</div><div style="font-size:12px; color:var(--text-faint);">Flip if measured outside</div></div>
-          <label class="switch"><input type="checkbox" id="measureModeSwitch"><span class="track"><span class="thumb"></span></span></label>
-        </div>
-        <div class="field" id="wallThicknessField" style="display:none;">
-          <label>Wall Thickness <span class="unit-tag">MM</span></label><input type="number" id="wallThickness" value="0">
-        </div>
-        <hr class="divider">
-        <div class="field"><label>Save Current Tank</label><input type="text" id="customTankName" placeholder="Enter name..."></div>
-        <button class="btn btn-ghost" id="saveTankBtn">Save Custom Tank</button>
-        <div id="savedTanksList" style="margin-top:20px;"></div>
       </section>
     </div>
 
@@ -264,12 +210,12 @@ button:focus-visible, select:focus-visible, input:focus-visible{ outline: 2px so
 
         <div class="field" id="volInputGroup" style="margin-bottom:0;">
           <label>Target Water Volume <span class="unit-tag">LITERS</span></label>
-          <input type="number" id="requiredLiters" placeholder="e.g. 350" style="font-size: 24px; font-weight: 700; height: 64px; color: var(--teal);">
+          <input type="number" id="requiredLiters" placeholder="e.g. 350" style="font-size: 22px; font-weight: 700; height: 56px; color: var(--teal);">
         </div>
         
         <div class="field" id="heightInputGroup" style="margin-bottom:0; display:none;">
           <label>Target Fill Height <span class="unit-tag" data-unit-label>CM</span></label>
-          <input type="number" id="requiredHeight" placeholder="e.g. 50" style="font-size: 24px; font-weight: 700; height: 64px; color: var(--teal);">
+          <input type="number" id="requiredHeight" placeholder="e.g. 50" style="font-size: 22px; font-weight: 700; height: 56px; color: var(--teal);">
         </div>
       </section>
 
@@ -277,11 +223,9 @@ button:focus-visible, select:focus-visible, input:focus-visible{ outline: 2px so
         <div class="panel-head"><div><div class="tag">03 · Live Visualizer</div><h2>Fill Status</h2></div></div>
         <div class="viz-stage"><div class="viz-svg-holder"><svg id="tankSvg" viewBox="0 0 240 320"></svg></div></div>
         <div id="statusBanner" class="status-banner ok"><span id="statusText">Enter details to calculate.</span></div>
-        <div class="readout-grid">
-          <div class="readout accent">
-            <div class="label" id="readoutLabel">Target Fill Height</div>
-            <div class="value" id="outHeight">0.0<span class="unit">cm</span></div>
-          </div>
+        <div class="readout accent">
+          <div class="label" id="readoutLabel">Target Fill Height</div>
+          <div class="value" id="outHeight">0.0<span class="unit">cm</span></div>
         </div>
       </section>
     </div>
@@ -325,10 +269,10 @@ function solveHeightForVolume(volFn, target, maxH){
   let lo=0, hi=maxH; for(let i=0; i<60; i++){ let mid=(lo+hi)/2; if(volFn(mid)<target) lo=mid; else hi=mid; } return (lo+hi)/2;
 }
 function getEffectiveDims(){
-  let t = state.measurementMode === "outer" ? state.wallThicknessMm/10 : 0; let d = state.dims;
-  if(state.shape==="vertical") return { diameter: d.diameter-2*t, height: d.height-2*t };
-  if(state.shape==="tapered") return { bottomDiameter: d.bottomDiameter-2*t, topDiameter: d.topDiameter-2*t, height: d.height-2*t };
-  return { diameter: d.diameter-2*t, length: d.length-2*t };
+  let d = state.dims;
+  if(state.shape==="vertical") return { diameter: d.diameter, height: d.height };
+  if(state.shape==="tapered") return { bottomDiameter: d.bottomDiameter, topDiameter: d.topDiameter, height: d.height };
+  return { diameter: d.diameter, length: d.length };
 }
 function getVolFnAndMaxHeight(eff){
   if(state.shape==="vertical") return { volFn: h => volCylinder(eff.diameter, h), maxHeight: eff.height };
@@ -416,7 +360,7 @@ function calcRender(){
   let readoutLbl = $("readoutLabel"), outH = $("outHeight"), stxt = $("statusText"), sb = $("statusBanner");
   
   if(!res.valid){
-    sb.className="status-banner ok"; stxt.textContent = res.reason==="dims"?"Enter valid dimensions.":"Enter target requirement.";
+    sb.className="status-banner ok"; stxt.textContent = res.reason==="dims"?"Enter dimensions.":"Enter target.";
     readoutLbl.textContent = state.calcMode==="vol2height"?"Target Fill Height":"Contained Volume";
     outH.innerHTML = state.calcMode==="vol2height" ? `0.0<span class="unit">${UNIT_LABEL[state.unit]}</span>` : `0<span class="unit">L</span>`;
     renderViz(0, false, null);
@@ -427,7 +371,7 @@ function calcRender(){
         readoutLbl.textContent = "Target Fill Height";
         outH.innerHTML = `${fmt(cmToUnit(res.h, state.unit),1)}<span class="unit">${UNIT_LABEL[state.unit]}</span>`;
     } else {
-        stxt.textContent = res.over ? `Warning! Height exceeds tank max.` : `At this height, tank holds ${fmt(res.liters,0)} L.`;
+        stxt.textContent = res.over ? `Warning! Height exceeds max.` : `Holds ${fmt(res.liters,0)} L.`;
         readoutLbl.textContent = "Contained Volume";
         outH.innerHTML = `${fmt(res.liters,0)}<span class="unit">L</span>`;
     }
@@ -437,7 +381,7 @@ function calcRender(){
 
 function renderViz(pct, over, res){
   pct = Math.max(0, Math.min(100, pct))/100;
-  let cx=120, yTop=20, yBot=300, H=280, tY = yBot - pct*H;
+  let yTop=20, yBot=300, H=280, tY = yBot - pct*H;
   let water = pct>0 ? `<g style="transform:translateY(${yBot - pct*H}px)"><path d="M40,0 Q80,-5 120,0 T200,0 L200,300 L40,300 Z" fill="${over?'var(--red)':'var(--teal)'}" opacity="0.6"/></g>` : "";
   let lineText = res ? (res.mode==="v2h" ? fmt(cmToUnit(res.h, state.unit),1)+UNIT_LABEL[state.unit] : fmt(res.liters,0)+" L") : "";
   let line = res ? `<line x1="40" y1="${tY}" x2="200" y2="${tY}" stroke="${over?'var(--red)':'var(--amber)'}" stroke-width="2" stroke-dasharray="4"/><text x="205" y="${tY+4}" font-family="monospace" font-size="12" fill="${over?'var(--red)':'var(--amber)'}">${lineText}</text>` : "";
