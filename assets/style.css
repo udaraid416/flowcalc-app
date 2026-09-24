@@ -1,5 +1,5 @@
 /* =========================================
-   Smart Agri Console - Custom Styling (Light Theme)
+   Smart Agri Console - Adaptive Theme (Light & Dark)
    ========================================= */
 
 /* Mobile Full Screen / Minimize Padding */
@@ -11,27 +11,56 @@
     max-width: 100% !important;
 }
 
-/* Overall App Background matching FlowCalc */
-.stApp {
-    background-color: #F4F7FA;
+/* Tabs Styling - Fix for invisible text in Light/Dark modes */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+    background-color: transparent;
 }
 
-/* Chat Messages Animation & Styling */
+.stTabs [data-baseweb="tab"] {
+    background-color: var(--secondary-background-color);
+    border-radius: 8px 8px 0px 0px;
+    padding: 10px 15px;
+    border: 1px solid var(--faded-text-color);
+    border-bottom: none;
+}
+
+/* Make inactive tab text clearly visible */
+.stTabs [data-baseweb="tab"] p {
+    color: var(--text-color) !important;
+    opacity: 0.7;
+    font-weight: 600;
+}
+
+/* Active tab text and styling */
+.stTabs [aria-selected="true"] {
+    background-color: var(--background-color);
+    border-color: var(--primary-color);
+    border-bottom: 2px solid var(--primary-color) !important;
+}
+
+.stTabs [aria-selected="true"] p {
+    color: var(--primary-color) !important;
+    opacity: 1;
+    font-weight: bold;
+}
+
+/* Chat Messages Animation & Adaptive Styling */
 .stChatMessage {
     animation: fadeIn 0.4s ease-out;
     border-radius: 14px;
     padding: 15px;
     margin-bottom: 15px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-    background-color: #FFFFFF;
-    border: 1px solid #E2E8F0;
-    color: #0F172A;
+    background-color: var(--secondary-background-color);
+    border: 1px solid var(--faded-text-color);
+    color: var(--text-color);
 }
 
 /* User Message Styling */
 [data-testid="chat-message-user"] {
-    background-color: rgba(14, 165, 233, 0.05);
-    border: 1px solid rgba(14, 165, 233, 0.2);
+    background-color: rgba(14, 165, 233, 0.1);
+    border: 1px solid rgba(14, 165, 233, 0.3);
 }
 
 @keyframes fadeIn {
@@ -39,41 +68,24 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* Button Hover Effects matching FlowCalc */
+/* Button Hover Effects */
 .stButton > button {
     transition: all 0.3s ease;
     border-radius: 10px;
     font-weight: 600;
-    background: #FFFFFF;
-    border: 1px solid #CBD5E1;
-    color: #0F172A;
+    background-color: var(--secondary-background-color);
+    border: 1px solid var(--faded-text-color);
+    color: var(--text-color);
 }
 
 .stButton > button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px -6px rgba(14, 165, 233, 0.4);
-    border-color: #0EA5E9;
-    color: #0EA5E9;
+    box-shadow: 0 8px 20px -6px var(--primary-color);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
 }
 
 /* Hide Default Streamlit Menu & Footer */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
-
-/* Tabs Styling */
-.stTabs [data-baseweb="tab-list"] {
-    gap: 8px;
-}
-.stTabs [data-baseweb="tab"] {
-    background-color: #F8FAFC;
-    border-radius: 8px;
-    padding: 10px 15px;
-    border: 1px solid #E2E8F0;
-}
-.stTabs [aria-selected="true"] {
-    background-color: rgba(14, 165, 233, 0.1);
-    border-color: #0EA5E9;
-    color: #0EA5E9;
-    font-weight: bold;
-}
