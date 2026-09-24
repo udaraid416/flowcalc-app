@@ -1,8 +1,6 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import google.generativeai as genai
-import tempfile
-import os
 from PIL import Image
 
 # ==========================================
@@ -67,18 +65,16 @@ tab1, tab2 = st.tabs(["💧 FlowCalc Engine", "🤖 Agri-Assistant AI"])
 
 # --- TAB 1: FlowCalc Engine ---
 with tab1:
-    components.html(html_code, height=1050, scrolling=True)
+    components.html(html_code, height=1000, scrolling=True)
 
 # --- TAB 2: Agri-Assistant AI ---
 with tab2:
-    st.header("🌱 Agri-Assistant (AI Bot)")
     st.write("Do you have an issue with your crops? Ask a question or share a photo.")
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
         
-    st.markdown("**📸 Image Scanner**")
-    with st.expander("Toggle Camera / Image Upload", expanded=False):
+    with st.expander("📸 Open Camera / Image Upload", expanded=False):
         img_file_buffer = st.camera_input("Take a photo")
         uploaded_file = st.file_uploader("Or Upload an Image", type=["jpg", "jpeg", "png"])
             
@@ -89,7 +85,7 @@ with tab2:
         img_to_send = Image.open(uploaded_file)
         
     if img_to_send:
-        st.image(img_to_send, caption="Image ready to be sent", width=300)
+        st.image(img_to_send, caption="Image ready to be sent", use_container_width=True)
         
     st.divider()
     
@@ -100,7 +96,7 @@ with tab2:
     user_query = st.chat_input("Type your question here...")
 
     if user_query or (img_to_send and user_query):
-        prompt_text = user_query if user_query else "Please analyze this and advise me in the same language I used."
+        prompt_text = user_query if user_query else "Please analyze this image and advise me."
         
         st.session_state.chat_history.append({"role": "user", "content": prompt_text})
         with st.chat_message("user"):
@@ -137,6 +133,3 @@ with tab2:
             file_name="Agri_Report_Log.txt",
             mime="text/plain"
         )
-        
-        if downloaded:
-            st.toast('Report Downloaded Successfully! 🌾', icon='✅')
