@@ -1,5 +1,5 @@
 /* =========================================
-   Smart Agri Console - Adaptive Theme (Light & Dark)
+   Smart Agri Console - Adaptive Theme & Mobile Responsive
    ========================================= */
 
 /* App Background matching FlowCalc grid */
@@ -11,7 +11,7 @@
     background-size: 40px 40px;
 }
 
-/* Mobile Full Screen / Minimize Padding */
+/* Default padding for Desktop */
 .block-container {
     padding-top: 2rem !important;
     padding-bottom: 2rem !important;
@@ -20,24 +20,37 @@
     max-width: 1100px !important;
 }
 
+/* Mobile Full Screen Fit (Max Width 768px) */
+@media (max-width: 768px) {
+    .block-container {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+}
+
 /* Tabs Styling */
 .stTabs [data-baseweb="tab-list"] {
-    gap: 8px;
+    gap: 5px;
     background-color: transparent;
 }
 
 .stTabs [data-baseweb="tab"] {
     background-color: var(--secondary-background-color);
     border-radius: 8px 8px 0px 0px;
-    padding: 10px 15px;
+    padding: 10px;
     border: 1px solid rgba(127,147,168,0.2);
     border-bottom: none;
+    flex-grow: 1; /* Tabs stretch to fit screen on mobile */
+    text-align: center;
 }
 
 .stTabs [data-baseweb="tab"] p {
     color: var(--text-color) !important;
     opacity: 0.7;
     font-weight: 600;
+    font-size: 14px;
 }
 
 .stTabs [aria-selected="true"] {
@@ -56,9 +69,9 @@
 .stChatMessage {
     animation: fadeIn 0.4s ease-out;
     border-radius: 14px;
-    padding: 20px;
-    margin-bottom: 15px;
-    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
+    padding: 15px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
     background-color: var(--secondary-background-color);
     border: 1px solid rgba(127,147,168,0.2);
     color: var(--text-color);
@@ -83,6 +96,7 @@
     background-color: var(--secondary-background-color);
     border: 1px solid rgba(127,147,168,0.3);
     color: var(--text-color);
+    width: 100%;
 }
 
 .stButton > button:hover {
