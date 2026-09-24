@@ -5,6 +5,7 @@ from audio_recorder_streamlit import audio_recorder
 from gtts import gTTS
 import tempfile
 import os
+import re
 from PIL import Image
 
 # ==========================================
@@ -32,7 +33,7 @@ except KeyError:
     st.warning("API Key not found! Please configure GEMINI_API_KEY in Streamlit Secrets.")
 
 # ==========================================
-# 3. DYNAMIC MODEL FETCHING (Error Fix)
+# 3. DYNAMIC MODEL FETCHING & HELPERS
 # ==========================================
 @st.cache_resource
 def get_working_model_name():
@@ -44,13 +45,22 @@ def get_working_model_name():
         pass
     return "models/gemini-1.5-flash" 
 
-# System Prompt - English language and concise answers
+# Helper: Detect language for Voice TTS
+def get_tts_lang(text):
+    # Check for Sinhala Unicode characters
+    if re.search("[\u0D80-\u0DFF]", text):
+        return 'si'
+    return 'en'
+
+# System Prompt - Multilingual Support
 system_instruction = """
 You are an experienced agricultural and farming expert. 
 Provide accurate, clear, and friendly advice to farmers and researchers regarding their crops (especially hydroponics, lettuce, etc.).
-You MUST provide all your answers and explanations entirely in English.
-Provide clear, concise, and straight-to-the-point answers to keep the text-to-speech fast and efficient.
-If you receive an image or an audio snippet, analyze it and suggest remedies in English.
+CRITICAL RULE: You MUST reply to the user in the EXACT SAME LANGUAGE they used to ask the question.
+- If they ask in English, reply in English.
+- If they ask in Sinhala, reply in Sinhala.
+- If they ask in Singlish (Sinhala written in English letters), reply in Singlish or standard Sinhala.
+Keep your answers clear, concise, and straight-to-the-point to keep the text-to-speech fast and efficient.
 """
 
 # ==========================================
@@ -74,38 +84,41 @@ with tab1:
 # --- TAB 2: Agri-Assistant AI ---
 with tab2:
     st.header("🌱 Agri-Assistant (AI Bot)")
-    st.write("Do you have an issue with your crops? Upload a photo of a leaf, or ask your question via microphone.")
+    st.write("Do you have an issue with your crops? Ask a question or share a photo.")
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    col1, col2 = st.columns(2)
+    # UI Layout: Voice Recorder on top, Camera hidden in an expander
+    col_voice, col_cam = st.columns([1, 1])
     
-    with col1:
-        st.markdown("**📸 Provide an Image**")
-        img_file_buffer = st.camera_input("Take a photo")
-        uploaded_file = st.file_uploader("Or Upload an Image", type=["jpg", "jpeg", "png"])
+    with col_voice:
+        st.markdown("**🎤 Voice Assistant** (Click to Start -> Speak -> Click to Stop)")
+        audio_bytes = audio_recorder(text="Record Audio", recording_color="#e84118", neutral_color="#0EA5E9")
         
-        img_to_send = None
-        if img_file_buffer is not None:
-            img_to_send = Image.open(img_file_buffer)
-        elif uploaded_file is not None:
-            img_to_send = Image.open(uploaded_file)
+    with col_cam:
+        st.markdown("**📸 Image Scanner**")
+        with st.expander("Toggle Camera / Image Upload", expanded=False):
+            img_file_buffer = st.camera_input("Take a photo")
+            uploaded_file = st.file_uploader("Or Upload an Image", type=["jpg", "jpeg", "png"])
             
-        if img_to_send:
-            st.image(img_to_send, caption="Uploaded Image", use_container_width=True)
-
-    with col2:
-        st.markdown("**🎤 Ask via Microphone**")
-        audio_bytes = audio_recorder(text="Click to Record", recording_color="#e84118", neutral_color="#00a8ff")
+    img_to_send = None
+    if img_file_buffer is not None:
+        img_to_send = Image.open(img_file_buffer)
+    elif uploaded_file is not None:
+        img_to_send = Image.open(uploaded_file)
+        
+    if img_to_send:
+        st.image(img_to_send, caption="Image ready to be sent", width=300)
         
     st.divider()
     
-    # Render Chat History
+    # Render Chat History (Auto-scrolls naturally in Streamlit)
     for msg in st.session_state.chat_history:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
+    # Input handlers
     user_query = st.chat_input("Type your question here...")
     
     audio_query = False
@@ -117,8 +130,8 @@ with tab2:
         audio_query = True
 
     # Process Query
-    if user_query or audio_query or img_to_send:
-        prompt_text = user_query if user_query else "Please check this image or audio and advise me in English."
+    if user_query or audio_query or (img_to_send and user_query):
+        prompt_text = user_query if user_query else "Please analyze this and advise me in the same language I used."
         
         st.session_state.chat_history.append({"role": "user", "content": prompt_text})
         with st.chat_message("user"):
@@ -139,7 +152,7 @@ with tab2:
                 st.error("Audio upload error. Please type your question.")
 
         with st.chat_message("assistant"):
-            with st.spinner("Analyzing... ⏳"):
+            with st.spinner("Thinking... ⏳"):
                 try:
                     # Initialize Model dynamically
                     model_name = get_working_model_name()
@@ -150,8 +163,10 @@ with tab2:
                     st.markdown(bot_reply)
                     st.session_state.chat_history.append({"role": "assistant", "content": bot_reply})
                     
-                    # Text to Speech (English - Fast Speed)
-                    tts = gTTS(text=bot_reply, lang='en', slow=False)
+                    # Auto-detect language for Text to Speech
+                    tts_lang = get_tts_lang(bot_reply)
+                    tts = gTTS(text=bot_reply, lang=tts_lang, slow=False)
+                    
                     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_mp3:
                         tts.save(tmp_mp3.name)
                         st.audio(tmp_mp3.name, format="audio/mp3", autoplay=True)
