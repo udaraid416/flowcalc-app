@@ -1,11 +1,8 @@
 import streamlit as st
 import streamlit.components.v1 as components
 import google.generativeai as genai
-from audio_recorder_streamlit import audio_recorder
-from gtts import gTTS
 import tempfile
 import os
-import re
 from PIL import Image
 
 # ==========================================
@@ -13,7 +10,6 @@ from PIL import Image
 # ==========================================
 st.set_page_config(page_title="Smart Agri Console", layout="wide", initial_sidebar_state="collapsed")
 
-# Load Custom CSS (Animations, Light/Dark Adaptive Theme & Full Screen)
 def local_css(file_name):
     try:
         with open(file_name, "r") as f:
@@ -45,22 +41,14 @@ def get_working_model_name():
         pass
     return "models/gemini-1.5-flash" 
 
-# Helper: Detect language for Voice TTS
-def get_tts_lang(text):
-    # Check for Sinhala Unicode characters
-    if re.search("[\u0D80-\u0DFF]", text):
-        return 'si'
-    return 'en'
-
-# System Prompt - Multilingual Support
 system_instruction = """
 You are an experienced agricultural and farming expert. 
-Provide accurate, clear, and friendly advice to farmers and researchers regarding their crops (especially hydroponics, lettuce, etc.).
+Provide accurate, clear, and friendly advice to farmers and researchers regarding their crops.
 CRITICAL RULE: You MUST reply to the user in the EXACT SAME LANGUAGE they used to ask the question.
 - If they ask in English, reply in English.
 - If they ask in Sinhala, reply in Sinhala.
-- If they ask in Singlish (Sinhala written in English letters), reply in Singlish or standard Sinhala.
-Keep your answers clear, concise, and straight-to-the-point to keep the text-to-speech fast and efficient.
+- If they ask in Singlish, reply in Singlish or standard Sinhala.
+Keep your answers clear, concise, and straight-to-the-point.
 """
 
 # ==========================================
@@ -79,7 +67,7 @@ tab1, tab2 = st.tabs(["💧 FlowCalc Engine", "🤖 Agri-Assistant AI"])
 
 # --- TAB 1: FlowCalc Engine ---
 with tab1:
-    components.html(html_code, height=950, scrolling=True)
+    components.html(html_code, height=1050, scrolling=True)
 
 # --- TAB 2: Agri-Assistant AI ---
 with tab2:
@@ -88,19 +76,11 @@ with tab2:
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
-
-    # UI Layout: Voice Recorder on top, Camera hidden in an expander
-    col_voice, col_cam = st.columns([1, 1])
-    
-    with col_voice:
-        st.markdown("**🎤 Voice Assistant** (Click to Start -> Speak -> Click to Stop)")
-        audio_bytes = audio_recorder(text="Record Audio", recording_color="#e84118", neutral_color="#0EA5E9")
         
-    with col_cam:
-        st.markdown("**📸 Image Scanner**")
-        with st.expander("Toggle Camera / Image Upload", expanded=False):
-            img_file_buffer = st.camera_input("Take a photo")
-            uploaded_file = st.file_uploader("Or Upload an Image", type=["jpg", "jpeg", "png"])
+    st.markdown("**📸 Image Scanner**")
+    with st.expander("Toggle Camera / Image Upload", expanded=False):
+        img_file_buffer = st.camera_input("Take a photo")
+        uploaded_file = st.file_uploader("Or Upload an Image", type=["jpg", "jpeg", "png"])
             
     img_to_send = None
     if img_file_buffer is not None:
@@ -113,24 +93,13 @@ with tab2:
         
     st.divider()
     
-    # Render Chat History (Auto-scrolls naturally in Streamlit)
     for msg in st.session_state.chat_history:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-    # Input handlers
     user_query = st.chat_input("Type your question here...")
-    
-    audio_query = False
-    if audio_bytes and "last_audio" not in st.session_state:
-        st.session_state.last_audio = audio_bytes
-        audio_query = True
-    elif audio_bytes and st.session_state.last_audio != audio_bytes:
-        st.session_state.last_audio = audio_bytes
-        audio_query = True
 
-    # Process Query
-    if user_query or audio_query or (img_to_send and user_query):
+    if user_query or (img_to_send and user_query):
         prompt_text = user_query if user_query else "Please analyze this and advise me in the same language I used."
         
         st.session_state.chat_history.append({"role": "user", "content": prompt_text})
@@ -140,21 +109,10 @@ with tab2:
         contents = [prompt_text]
         if img_to_send:
             contents.append(img_to_send)
-        
-        if audio_bytes and audio_query:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_audio:
-                tmp_audio.write(audio_bytes)
-                tmp_audio_path = tmp_audio.name
-            try:
-                audio_file = genai.upload_file(path=tmp_audio_path)
-                contents.append(audio_file)
-            except Exception as e:
-                st.error("Audio upload error. Please type your question.")
 
         with st.chat_message("assistant"):
             with st.spinner("Thinking... ⏳"):
                 try:
-                    # Initialize Model dynamically
                     model_name = get_working_model_name()
                     model = genai.GenerativeModel(model_name, system_instruction=system_instruction)
                     
@@ -162,19 +120,10 @@ with tab2:
                     bot_reply = response.text
                     st.markdown(bot_reply)
                     st.session_state.chat_history.append({"role": "assistant", "content": bot_reply})
-                    
-                    # Auto-detect language for Text to Speech
-                    tts_lang = get_tts_lang(bot_reply)
-                    tts = gTTS(text=bot_reply, lang=tts_lang, slow=False)
-                    
-                    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_mp3:
-                        tts.save(tmp_mp3.name)
-                        st.audio(tmp_mp3.name, format="audio/mp3", autoplay=True)
                         
                 except Exception as e:
                     st.error(f"Sorry, an error occurred. System Error: {e}")
 
-    # Report Download Option
     if len(st.session_state.chat_history) > 0:
         st.divider()
         report_text = "Agri-Assistant Daily Report\n================================================\n\n"
