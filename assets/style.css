@@ -2,16 +2,25 @@
    Smart Agri Console - Adaptive Theme (Light & Dark)
    ========================================= */
 
-/* Mobile Full Screen / Minimize Padding */
-.block-container {
-    padding-top: 1rem !important;
-    padding-bottom: 1rem !important;
-    padding-left: 0.5rem !important;
-    padding-right: 0.5rem !important;
-    max-width: 100% !important;
+/* App Background matching FlowCalc grid */
+.stApp {
+    background-color: var(--background-color);
+    background-image:
+        linear-gradient(var(--secondary-background-color) 1px, transparent 1px),
+        linear-gradient(90deg, var(--secondary-background-color) 1px, transparent 1px);
+    background-size: 40px 40px;
 }
 
-/* Tabs Styling - Fix for invisible text in Light/Dark modes */
+/* Mobile Full Screen / Minimize Padding */
+.block-container {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+    max-width: 1100px !important;
+}
+
+/* Tabs Styling */
 .stTabs [data-baseweb="tab-list"] {
     gap: 8px;
     background-color: transparent;
@@ -21,18 +30,16 @@
     background-color: var(--secondary-background-color);
     border-radius: 8px 8px 0px 0px;
     padding: 10px 15px;
-    border: 1px solid var(--faded-text-color);
+    border: 1px solid rgba(127,147,168,0.2);
     border-bottom: none;
 }
 
-/* Make inactive tab text clearly visible */
 .stTabs [data-baseweb="tab"] p {
     color: var(--text-color) !important;
     opacity: 0.7;
     font-weight: 600;
 }
 
-/* Active tab text and styling */
 .stTabs [aria-selected="true"] {
     background-color: var(--background-color);
     border-color: var(--primary-color);
@@ -49,18 +56,18 @@
 .stChatMessage {
     animation: fadeIn 0.4s ease-out;
     border-radius: 14px;
-    padding: 15px;
+    padding: 20px;
     margin-bottom: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08);
     background-color: var(--secondary-background-color);
-    border: 1px solid var(--faded-text-color);
+    border: 1px solid rgba(127,147,168,0.2);
     color: var(--text-color);
+    backdrop-filter: blur(10px);
 }
 
-/* User Message Styling */
 [data-testid="chat-message-user"] {
-    background-color: rgba(14, 165, 233, 0.1);
-    border: 1px solid rgba(14, 165, 233, 0.3);
+    background-color: rgba(14, 165, 233, 0.08);
+    border: 1px solid rgba(14, 165, 233, 0.2);
 }
 
 @keyframes fadeIn {
@@ -74,7 +81,7 @@
     border-radius: 10px;
     font-weight: 600;
     background-color: var(--secondary-background-color);
-    border: 1px solid var(--faded-text-color);
+    border: 1px solid rgba(127,147,168,0.3);
     color: var(--text-color);
 }
 
@@ -85,7 +92,7 @@
     color: var(--primary-color);
 }
 
-/* Hide Default Streamlit Menu & Footer */
+/* Hide Default Streamlit Elements */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
 header {visibility: hidden;}
