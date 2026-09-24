@@ -12,7 +12,7 @@ from PIL import Image
 # ==========================================
 st.set_page_config(page_title="Smart Agri Console", layout="wide", initial_sidebar_state="collapsed")
 
-# Load Custom CSS (Animations, Light Theme & Full Screen)
+# Load Custom CSS (Animations, Light/Dark Adaptive Theme & Full Screen)
 def local_css(file_name):
     try:
         with open(file_name, "r") as f:
