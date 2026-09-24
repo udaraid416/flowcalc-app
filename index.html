@@ -5,46 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>FlowCalc — Fill-Height Console</title>
 <style>
-/* ==========================================================================
-   FONTS
-   ========================================================================== */
+/* FONTS */
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
 
-/* ==========================================================================
-   DESIGN TOKENS (WHITE / LIGHT THEME DEFAULT)
-   ========================================================================== */
+/* DESIGN TOKENS */
 :root {
   color-scheme: light;
-  
-  /* Backgrounds & Panels */
   --bg:            #F4F7FA;
   --bg-grid:       #E2E8F0;
   --panel:         #FFFFFF;
   --panel-solid:   #FFFFFF;
   --panel-border:  #E2E8F0;
   --panel-border-strong: #CBD5E1;
-  
-  /* Typography */
   --text:          #0F172A;
   --text-dim:      #475569;
   --text-faint:    #94A3B8;
-  
-  /* Accents */
   --teal:          #0EA5E9; 
   --teal-dim:      #0284C7;
   --amber:         #F59E0B;
   --amber-dim:     #D97706;
   --red:           #EF4444;
   --red-dim:       #DC2626;
-  
-  /* Water Gradients */
   --water-a:       #38BDF8;
   --water-b:       #06B6D4;
   --water-c:       #0284C7;
   --water-overflow-a: #EF4444;
   --water-overflow-b: #F87171;
-  
-  /* UI Components */
   --input-bg:      #FFFFFF;
   --input-border:  #CBD5E1;
   --input-focus:   rgba(14, 165, 233, 0.15);
@@ -52,25 +38,19 @@
   --tab-hover:     #F1F5F9;
   --readout-bg:    #F8FAFC;
   --readout-hover: #F1F5F9;
-  
-  /* Tank SVG */
   --tank-fill:     #F8FAFC;
   --tank-outline:  #CBD5E1;
   --glass-1:       rgba(255, 255, 255, 0.7);
   --glass-2:       rgba(255, 255, 255, 0.1);
-  
-  /* Layout */
   --radius-lg: 20px;
   --radius-md: 14px;
   --radius-sm: 10px;
   --shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.02);
   --panel-shadow-hover: 0 20px 40px -12px rgba(0, 0, 0, 0.12);
-  
   --font-ui: 'Space Grotesk', system-ui, sans-serif;
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
 }
 
-/* DARK THEME FALLBACK */
 html[data-theme="dark"] {
   color-scheme: dark;
   --bg:            #060B14;
@@ -100,132 +80,44 @@ html[data-theme="dark"] {
 }
 
 *{ box-sizing:border-box; }
-
-/* FIX HORIZONTAL OVERFLOW FOR MOBILE */
-html, body {
-  margin: 0; 
-  padding: 0; 
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden; /* Prevent half-screen zoom out */
-}
+html, body { margin: 0; padding: 0; width: 100%; max-width: 100vw; overflow-x: hidden; }
 
 body{
-  background:
-    radial-gradient(circle at 15% 0%, rgba(14, 165, 233, 0.06), transparent 45%),
-    radial-gradient(circle at 100% 20%, rgba(6, 182, 212, 0.04), transparent 40%),
-    var(--bg);
-  background-attachment: fixed;
-  color: var(--text);
-  font-family: var(--font-ui);
-  min-height: 100vh;
-  -webkit-font-smoothing: antialiased;
-  transition: background-color .4s ease, color .4s ease;
+  background: radial-gradient(circle at 15% 0%, rgba(14, 165, 233, 0.06), transparent 45%), radial-gradient(circle at 100% 20%, rgba(6, 182, 212, 0.04), transparent 40%), var(--bg);
+  background-attachment: fixed; color: var(--text); font-family: var(--font-ui); min-height: 100vh;
+  -webkit-font-smoothing: antialiased; transition: background-color .4s ease, color .4s ease;
 }
-
 body::before{
-  content:"";
-  position:fixed; inset:0;
-  background-image:
-    linear-gradient(var(--bg-grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
-  background-size: 40px 40px;
-  opacity:.6;
-  pointer-events:none;
-  z-index:0;
+  content:""; position:fixed; inset:0;
+  background-image: linear-gradient(var(--bg-grid) 1px, transparent 1px), linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px);
+  background-size: 40px 40px; opacity:.6; pointer-events:none; z-index:0;
 }
 ::selection{ background: var(--teal); color:#fff; }
 button, select, input{ font-family: inherit; }
 a{ color: var(--teal); }
+button:focus-visible, select:focus-visible, input:focus-visible{ outline: 2px solid var(--teal); outline-offset: 2px; }
 
-button:focus-visible, select:focus-visible, input:focus-visible, [tabindex]:focus-visible{
-  outline: 2px solid var(--teal);
-  outline-offset: 2px;
-}
-
-/* ==========================================================================
-   LAYOUT SHELL
-   ========================================================================== */
-.wrap{ 
-  position:relative; 
-  z-index:1; 
-  max-width:1100px; 
-  width: 100%;
-  margin:0 auto; 
-  padding: 20px 20px 60px; 
-  overflow-x: hidden;
-}
-
-.topbar{
-  display:flex; align-items:center; justify-content:space-between; gap:16px;
-  padding: 16px 20px;
-  border:1px solid var(--panel-border);
-  background: var(--panel);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: var(--radius-lg);
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-  box-shadow: var(--shadow);
-  width: 100%;
-}
+.wrap{ position:relative; z-index:1; max-width:1100px; width: 100%; margin:0 auto; padding: 20px 20px 60px; overflow-x: hidden;}
+.topbar{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding: 16px 20px; border:1px solid var(--panel-border); background: var(--panel); backdrop-filter: blur(20px); border-radius: var(--radius-lg); margin-bottom: 24px; box-shadow: var(--shadow); width: 100%;}
 .brand{ display:flex; align-items:center; gap:14px; }
-.brand-mark{
-  width:44px; height:44px; border-radius:12px;
-  background: linear-gradient(135deg, var(--water-b), var(--water-a));
-  display:flex; align-items:center; justify-content:center;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.4) inset, 0 8px 16px -4px rgba(14, 165, 233, 0.4);
-  flex-shrink:0;
-}
+.brand-mark{ width:44px; height:44px; border-radius:12px; background: linear-gradient(135deg, var(--water-b), var(--water-a)); display:flex; align-items:center; justify-content:center; box-shadow: 0 0 0 1px rgba(255,255,255,0.4) inset, 0 8px 16px -4px rgba(14, 165, 233, 0.4); flex-shrink:0;}
 .brand-mark svg{ width:24px; height:24px; color: #fff; }
 .brand-text .eyebrow{ font-family: var(--font-mono); font-size:10.5px; letter-spacing:.15em; color: var(--teal); text-transform:uppercase; font-weight: 700;}
 .brand-text h1{ margin:0; font-size:20px; font-weight:700; letter-spacing:-.01em; color: var(--text); }
-
 .controls-row{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
 
-.segmented{
-  display:inline-flex; background: var(--tab-bg);
-  border:1px solid var(--panel-border); border-radius: 999px; padding:4px; gap:2px;
-}
-.segmented button{
-  border:none; background:transparent; color:var(--text-dim);
-  padding:8px 16px; border-radius:999px; font-size:13px; font-weight:700;
-  font-family: var(--font-mono); cursor:pointer; transition: all .2s ease;
-}
+.segmented{ display:inline-flex; background: var(--tab-bg); border:1px solid var(--panel-border); border-radius: 999px; padding:4px; gap:2px; }
+.segmented button{ border:none; background:transparent; color:var(--text-dim); padding:8px 16px; border-radius:999px; font-size:13px; font-weight:700; font-family: var(--font-mono); cursor:pointer; transition: all .2s ease;}
 .segmented button.active{ background: var(--teal); color:#fff; box-shadow: 0 4px 12px -2px var(--teal-dim); }
 .segmented button:hover:not(.active){ color:var(--text); background: var(--tab-hover);}
 
-.icon-btn{
-  width:44px; height:44px; border-radius:12px;
-  border:1px solid var(--panel-border);
-  background: var(--tab-bg);
-  color: var(--text-dim);
-  display:flex; align-items:center; justify-content:center;
-  cursor:pointer; transition: all .2s ease;
-}
+.icon-btn{ width:44px; height:44px; border-radius:12px; border:1px solid var(--panel-border); background: var(--tab-bg); color: var(--text-dim); display:flex; align-items:center; justify-content:center; cursor:pointer; transition: all .2s ease;}
 .icon-btn:hover{ border-color: var(--panel-border-strong); background: var(--tab-hover); color: var(--text); transform: translateY(-1px);}
-html[data-theme="light"] .icon-btn:hover { background: rgba(16,42,67,0.05); }
 .icon-btn svg{ width:20px; height:20px; }
 
-/* ==========================================================================
-   GRID & PANELS
-   ========================================================================== */
 .grid{ display:grid; grid-template-columns: 1fr 1fr; gap:24px; align-items:start; width: 100%; }
-
-.panel{
-  border:1px solid var(--panel-border);
-  background: var(--panel);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  padding: 24px;
-  margin-bottom: 24px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-  width: 100%;
-}
+.panel{ border:1px solid var(--panel-border); background: var(--panel); backdrop-filter: blur(20px); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 24px; margin-bottom: 24px; transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease; width: 100%;}
 .panel:hover { box-shadow: var(--panel-shadow-hover); }
-
 .panel-head{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:24px; }
 .panel-head .tag{ font-family:var(--font-mono); font-size:10.5px; letter-spacing:.15em; text-transform:uppercase; color:var(--teal); font-weight: 700; margin-bottom: 4px;}
 .panel-head h2{ margin:0; font-size:19px; font-weight:700; }
@@ -233,372 +125,165 @@ html[data-theme="light"] .icon-btn:hover { background: rgba(16,42,67,0.05); }
 .field{ margin-bottom:18px; }
 .field label{ display:flex; justify-content:space-between; align-items:center; font-size:13px; color:var(--text-dim); margin-bottom:8px; font-weight:600; letter-spacing:.02em; }
 .field label .unit-tag{ font-family:var(--font-mono); font-size:10px; color:var(--text-faint); background:var(--tab-bg); border: 1px solid var(--panel-border); padding:3px 6px; border-radius:6px; font-weight: 700;}
-
-/* Ensure inputs don't stretch layout */
-.field select, .field input[type="text"], .field input[type="number"]{
-  width:100%; 
-  max-width: 100%;
-  padding:14px 16px; border-radius: var(--radius-sm);
-  border:1px solid var(--input-border); background: var(--input-bg);
-  color: var(--text); font-size:16px; font-family: var(--font-mono); font-weight:600;
-  transition: all .2s ease;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.02) inset;
-  appearance: none;
-  -webkit-appearance: none;
-  text-overflow: ellipsis;
-}
+.field select, .field input[type="text"], .field input[type="number"]{ width:100%; padding:14px 16px; border-radius: var(--radius-sm); border:1px solid var(--input-border); background: var(--input-bg); color: var(--text); font-size:16px; font-family: var(--font-mono); font-weight:600; transition: all .2s ease;}
 .field select:focus, .field input:focus{ border-color: var(--teal); box-shadow: 0 0 0 4px var(--input-focus); outline:none; }
-.field select{ cursor:pointer; }
 .field .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.field small.desc{ display:block; margin-top:8px; font-size:11px; color:var(--text-faint); line-height: 1.4;}
 
 .divider{ height:1px; background: var(--panel-border); margin: 24px 0; border:none; }
-
 .shape-tabs{ display:grid; grid-template-columns: repeat(3,1fr); gap:10px; margin-bottom:24px; }
-.shape-tab{
-  border:1px solid var(--panel-border); background: var(--tab-bg);
-  border-radius: var(--radius-md); padding:16px 8px; cursor:pointer; text-align:center;
-  color: var(--text-dim); transition: all .2s ease;
-}
+.shape-tab{ border:1px solid var(--panel-border); background: var(--tab-bg); border-radius: var(--radius-md); padding:16px 8px; cursor:pointer; text-align:center; color: var(--text-dim); transition: all .2s ease;}
 .shape-tab svg{ width:28px; height:28px; margin-bottom:8px; transition: transform .2s ease; }
 .shape-tab span{ display:block; font-size:12px; font-weight:700; letter-spacing:.02em; }
 .shape-tab.active{ border-color: var(--teal); color: var(--teal); background: var(--input-focus); box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.2) inset; }
-.shape-tab.active svg{ transform: scale(1.1); }
-.shape-tab:hover:not(.active){ border-color: var(--panel-border-strong); color:var(--text); background: var(--tab-hover); }
 
-.btn{
-  display:inline-flex; align-items:center; justify-content:center; gap:8px;
-  padding:14px 20px; border-radius: var(--radius-sm); border:1px solid transparent;
-  font-weight:700; font-size:15px; cursor:pointer; transition: all .2s cubic-bezier(0.4, 0, 0.2, 1); width:100%;
-  font-family: var(--font-ui); letter-spacing:.02em; min-height: 52px;
-}
-.btn svg{ width:18px; height:18px; }
-.btn-primary{ background: linear-gradient(135deg, var(--water-b), var(--water-a)); color:#fff; box-shadow: 0 8px 20px -6px var(--teal-dim); }
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:14px 20px; border-radius: var(--radius-sm); border:1px solid transparent; font-weight:700; font-size:15px; cursor:pointer; transition: all .2s ease; width:100%; min-height: 52px;}
 .btn-ghost{ background: var(--tab-bg); border-color: var(--panel-border); color: var(--text); }
 .btn-ghost:hover{ background: var(--tab-hover); border-color: var(--panel-border-strong); transform: translateY(-1px); }
 
-.saved-row{
-  display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius: var(--radius-sm);
-  background: var(--tab-bg); border:1px solid var(--panel-border); margin-bottom:8px;
-  transition: all .2s ease;
-}
-.saved-row:hover { background: var(--tab-hover); border-color: var(--panel-border-strong); }
-.saved-row .name{ flex:1; font-size:14px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.saved-row .meta{ font-family:var(--font-mono); font-size:11px; color:var(--text-faint); margin-top: 4px;}
-.saved-row button{ border:none; background:rgba(127,147,168,0.1); color:var(--text-dim); cursor:pointer; padding:10px; border-radius:8px; transition: all .2s;}
-.saved-row button:hover{ color: var(--red); background: rgba(239,68,68,0.15); transform: scale(1.05);}
-.saved-row button.load-btn:hover{ color: var(--teal); background: var(--input-focus); }
-.empty-note{ font-size:13px; color: var(--text-faint); font-style:italic; padding:12px 4px; text-align: center;}
+.saved-row{ display:flex; align-items:center; gap:10px; padding:12px 14px; border-radius: var(--radius-sm); background: var(--tab-bg); border:1px solid var(--panel-border); margin-bottom:8px;}
+.saved-row .name{ flex:1; font-size:14px; font-weight:700;}
+.saved-row button{ border:none; background:rgba(127,147,168,0.1); color:var(--text-dim); padding:10px; border-radius:8px; cursor:pointer;}
+.empty-note{ font-size:13px; color: var(--text-faint); padding:12px; text-align: center;}
 
-/* ==========================================================================
-   ANIMATED VISUALIZER
-   ========================================================================== */
-.viz-stage{
-  display:flex; align-items:center; justify-content:center; padding: 10px 0 20px;
-  position: relative;
-}
-.viz-svg-holder{ position:relative; width:220px; flex-shrink:0; filter: drop-shadow(0 15px 30px rgba(14, 165, 233, 0.15));}
+.viz-stage{ display:flex; align-items:center; justify-content:center; padding: 10px 0 20px; position: relative;}
+.viz-svg-holder{ position:relative; width:220px; filter: drop-shadow(0 15px 30px rgba(14, 165, 233, 0.15));}
 .viz-svg-holder svg{ width:100%; height:auto; display:block; overflow:visible; }
 
-/* Readouts - Adjusted to only show target height prominently */
-.readout-grid{
-  display:grid; grid-template-columns: 1fr; gap:16px; margin-top:20px; width: 100%;
-}
-.readout{
-  border:1px solid var(--panel-border); border-radius: var(--radius-md);
-  background: var(--readout-bg); padding:24px; text-align: center;
-  transition: all 0.3s ease;
-  width: 100%;
-}
-.readout:hover { background: var(--readout-hover); border-color: var(--panel-border-strong); box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+.readout-grid{ display:grid; grid-template-columns: 1fr; gap:16px; margin-top:20px; width: 100%;}
+.readout{ border:1px solid var(--panel-border); border-radius: var(--radius-md); background: var(--readout-bg); padding:24px; text-align: center;}
 .readout .label{ font-size:12px; text-transform:uppercase; letter-spacing:.15em; color:var(--text-faint); font-weight:700; margin-bottom: 12px;}
-.readout .value{ font-family: var(--font-mono); font-size:42px; font-weight:700; color:var(--text); letter-spacing: -0.02em;}
+.readout .value{ font-family: var(--font-mono); font-size:42px; font-weight:700; color:var(--text);}
 .readout .value .unit{ font-size:16px; color: var(--text-dim); margin-left:6px; font-weight: 600;}
 .readout.accent { border-color: rgba(14, 165, 233, 0.4); background: var(--input-focus); }
 .readout.accent .value{ color: var(--teal); }
 
-.status-banner{
-  display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius: var(--radius-md);
-  font-size:14px; font-weight:600; margin-top:24px; border:1px solid transparent; line-height: 1.5;
-  transition: all 0.3s ease;
-  width: 100%;
-}
-.status-banner svg{ width:24px; height:24px; flex-shrink:0; }
+.status-banner{ display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius: var(--radius-md); font-size:14px; font-weight:600; margin-top:24px; border:1px solid transparent;}
 .status-banner.ok{ background: var(--input-focus); border-color: rgba(14, 165, 233, 0.3); color: var(--teal-dim); }
-.status-banner.overflow{ background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: var(--red); animation: pulse-warn 1.5s infinite alternate; }
+.status-banner.overflow{ background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: var(--red); }
 .status-banner.error{ background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.2); color: var(--red); }
-@keyframes pulse-warn{ 0%{ box-shadow:0 0 0 0 rgba(239,68,68,0.05);} 100%{ box-shadow:0 0 15px 5px rgba(239,68,68,0.15);} }
 
-/* High Animation CSS for Water & Bubbles */
-.water-group {
-    transition: transform 1.5s cubic-bezier(0.25, 1.2, 0.5, 1);
-    transform-origin: bottom;
-}
-.wave-a { animation: waveScroll 3.5s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite; opacity: 0.95; }
-.wave-b { animation: waveScroll 5.5s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite reverse; opacity: 0.6; }
+.water-group { transition: transform 1.5s cubic-bezier(0.25, 1.2, 0.5, 1); transform-origin: bottom;}
+.wave-a { animation: waveScroll 3.5s infinite; opacity: 0.95; }
+.wave-b { animation: waveScroll 5.5s infinite reverse; opacity: 0.6; }
 .wave-c { animation: waveScroll 7s linear infinite; opacity: 0.35; transform: scaleY(1.2); }
 @keyframes waveScroll{ from{ transform: translateX(0); } to{ transform: translateX(-80px); } }
-
-.bubble {
-    fill: rgba(255, 255, 255, 0.7);
-    animation: rise ease-in infinite, wiggle ease-in-out infinite alternate;
-    transform-origin: center;
-}
-@keyframes rise {
-    0% { transform: translateY(0) scale(0.5); opacity: 0; }
-    20% { opacity: 1; transform: translateY(-20px) scale(1.2); }
-    80% { opacity: 0.8; }
-    100% { transform: translateY(-160px) scale(0.8); opacity: 0; }
-}
-@keyframes wiggle {
-    0% { transform: translateX(0px); }
-    100% { transform: translateX(8px); }
-}
+.bubble { fill: rgba(255, 255, 255, 0.7); animation: rise 3s infinite; }
+@keyframes rise { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(-160px) scale(0.8); opacity: 0; } }
 
 .target-line{ transition: y 1.2s cubic-bezier(0.25, 1.2, 0.5, 1); }
-
-/* Field row for measurement-mode toggle */
-.mode-row{ display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; padding: 16px; background: var(--tab-bg); border-radius: var(--radius-md); border: 1px solid var(--panel-border);}
-.mode-row .label-block .t{ font-size:14px; font-weight:700; margin-bottom: 4px; color: var(--text);}
-.mode-row .label-block .d{ font-size:12px; color:var(--text-faint); line-height: 1.4;}
-.switch{ position:relative; width:52px; height:28px; flex-shrink:0; }
+.mode-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; padding: 16px; background: var(--tab-bg); border-radius: var(--radius-md); border: 1px solid var(--panel-border);}
+.switch{ position:relative; width:52px; height:28px; }
 .switch input{ opacity:0; width:0; height:0; position:absolute; }
-.switch .track{ position:absolute; inset:0; background: var(--panel-border-strong); border-radius:999px; cursor:pointer; transition: background .3s ease; }
-.switch .thumb{ position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition: transform .3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+.switch .track{ position:absolute; inset:0; background: var(--panel-border-strong); border-radius:999px; cursor:pointer; }
+.switch .thumb{ position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:50%; background:#fff; transition: transform .3s; }
 .switch input:checked + .track{ background: var(--teal); }
 .switch input:checked + .track .thumb{ transform: translateX(24px); }
 
-/* ==========================================================================
-   MOBILE OPTIMIZATIONS (100% Responsive Fit)
-   ========================================================================== */
-@media (max-width: 940px){ 
-  .grid{ grid-template-columns: 1fr; gap: 20px; } 
-}
-
+@media (max-width: 940px){ .grid{ grid-template-columns: 1fr; gap: 20px; } }
 @media (max-width: 600px){
-  /* Reduce outer wrapper paddings to maximize screen real estate */
-  .wrap { padding: 12px 12px 40px; width: 100%; max-width: 100vw; }
-  .topbar { padding: 14px 16px; flex-direction: column; align-items: flex-start; gap: 16px; border-radius: 14px;}
-  .controls-row { width: 100%; justify-content: space-between; }
-  
-  /* Panels adapt to exact screen width */
-  .panel { padding: 16px; border-radius: 14px; margin-bottom: 16px; width: 100%; }
-  .panel-head h2 { font-size: 18px; }
-  
-  /* Make fill height super prominent on mobile */
+  .wrap { padding: 12px 12px 40px; }
+  .topbar { flex-direction: column; align-items: flex-start; }
   .readout .value { font-size: 36px; }
-  .readout { padding: 20px; width: 100%; }
-  
-  .viz-svg-holder { width: 160px; margin: 0 auto; }
-  .brand-text h1 { font-size: 18px; }
-  
-  .shape-tabs { gap: 6px; }
-  .shape-tab { padding: 12px 4px; }
-  .shape-tab svg { width: 22px; height: 22px; }
-  .shape-tab span { font-size: 11px; }
-  
-  .field .row2 { gap: 10px; grid-template-columns: 1fr 1fr; }
-  
-  /* Enhance mobile touch areas and text size */
-  .btn, .field select, .field input[type="text"], .field input[type="number"] { min-height: 48px; font-size: 16px; }
-}
-
-@media (max-width: 400px){
-  .field .row2 { grid-template-columns: 1fr; gap: 12px; }
-  .viz-svg-holder { width: 150px; }
-  .readout .value { font-size: 32px; }
 }
 </style>
 </head>
 <body>
 <div class="wrap">
-
-  <!-- ==========================================================================
-       TOP BAR
-       ========================================================================== -->
   <header class="topbar">
     <div class="brand">
-      <div class="brand-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-      </div>
-      <div class="brand-text">
-        <div class="eyebrow">Smart Volume Engine</div>
-        <h1>FlowCalc</h1>
-      </div>
+      <div class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+      <div class="brand-text"><div class="eyebrow">Smart Volume Engine</div><h1>FlowCalc</h1></div>
     </div>
     <div class="controls-row">
-      <div class="segmented" id="unitToggle" role="group" aria-label="Measurement unit">
+      <div class="segmented" id="unitToggle">
         <button data-unit="cm" class="active">CM</button>
         <button data-unit="in">IN</button>
         <button data-unit="ft">FT</button>
         <button data-unit="m">M</button>
       </div>
-      <button class="icon-btn" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">
-        <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg>
-      </button>
+      <button class="icon-btn" id="themeToggle"><svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg></button>
     </div>
   </header>
 
   <div class="grid">
-    <!-- ==========================================================================
-         LEFT COLUMN — CONFIGURATION
-         ========================================================================== -->
     <div class="col-left">
-
       <section class="panel">
-        <div class="panel-head">
-          <div><div class="tag">01 · Tank Profile</div><h2>Select Tank Details</h2></div>
-        </div>
-
-        <div class="field">
-          <label for="brandSelect">Brand</label>
-          <select id="brandSelect"></select>
-        </div>
-        <div class="field" id="capacityField">
-          <label for="capacitySelect">Standard Capacity</label>
-          <select id="capacitySelect"></select>
-        </div>
-
-        <div class="field" id="savedTankField" style="display:none;">
-          <label for="savedTankSelect">Load Saved Custom Tank</label>
-          <select id="savedTankSelect"><option value="">— choose a saved tank —</option></select>
-        </div>
-
+        <div class="panel-head"><div><div class="tag">01 · Tank Profile</div><h2>Select Tank Details</h2></div></div>
+        <div class="field"><label>Brand</label><select id="brandSelect"></select></div>
+        <div class="field" id="capacityField"><label>Standard Capacity</label><select id="capacitySelect"></select></div>
+        <div class="field" id="savedTankField" style="display:none;"><label>Load Saved</label><select id="savedTankSelect"></select></div>
         <hr class="divider">
-
-        <div class="field" style="margin-bottom:12px;">
-          <label>Tank Shape Profile</label>
-        </div>
         <div class="shape-tabs" id="shapeTabs">
-          <div class="shape-tab active" data-shape="vertical">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M6 14h12"/></svg>
-            <span>VERTICAL</span>
-          </div>
-          <div class="shape-tab" data-shape="tapered">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 3h8l3 18H5L8 3Z"/><path d="M6.4 14h11.2"/></svg>
-            <span>TAPERED</span>
-          </div>
-          <div class="shape-tab" data-shape="horizontal">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M2 13h20"/></svg>
-            <span>HORIZONTAL</span>
-          </div>
+          <div class="shape-tab active" data-shape="vertical"><span>VERTICAL</span></div>
+          <div class="shape-tab" data-shape="tapered"><span>TAPERED</span></div>
+          <div class="shape-tab" data-shape="horizontal"><span>HORIZONTAL</span></div>
         </div>
-
-        <!-- Shape-specific dimension inputs -->
+        
         <div id="dimsVertical" class="dims-group">
           <div class="field row2">
-            <div>
-              <label>Diameter <span class="unit-tag" data-unit-label>CM</span></label>
-              <input type="number" id="v_diameter" step="0.1" min="0">
-            </div>
-            <div>
-              <label>Height <span class="unit-tag" data-unit-label>CM</span></label>
-              <input type="number" id="v_height" step="0.1" min="0">
-            </div>
+            <div><label>Diameter <span class="unit-tag" data-unit-label>CM</span></label><input type="number" id="v_diameter"></div>
+            <div><label>Height <span class="unit-tag" data-unit-label>CM</span></label><input type="number" id="v_height"></div>
           </div>
         </div>
-
         <div id="dimsTapered" class="dims-group" style="display:none;">
           <div class="field row2">
-            <div>
-              <label>Bottom Ø <span class="unit-tag" data-unit-label>CM</span></label>
-              <input type="number" id="t_bottom" step="0.1" min="0">
-            </div>
-            <div>
-              <label>Top Ø <span class="unit-tag" data-unit-label>CM</span></label>
-              <input type="number" id="t_top" step="0.1" min="0">
-            </div>
+            <div><label>Bottom Ø <span class="unit-tag" data-unit-label>CM</span></label><input type="number" id="t_bottom"></div>
+            <div><label>Top Ø <span class="unit-tag" data-unit-label>CM</span></label><input type="number" id="t_top"></div>
           </div>
-          <div class="field">
-            <label>Height <span class="unit-tag" data-unit-label>CM</span></label>
-            <input type="number" id="t_height" step="0.1" min="0">
-          </div>
+          <div class="field"><label>Height <span class="unit-tag" data-unit-label>CM</span></label><input type="number" id="t_height"></div>
         </div>
-
         <div id="dimsHorizontal" class="dims-group" style="display:none;">
           <div class="field row2">
-            <div>
-              <label>Diameter <span class="unit-tag" data-unit-label>CM</span></label>
-              <input type="number" id="h_diameter" step="0.1" min="0">
-            </div>
-            <div>
-              <label>Length <span class="unit-tag" data-unit-label>CM</span></label>
-              <input type="number" id="h_length" step="0.1" min="0">
-            </div>
+            <div><label>Diameter <span class="unit-tag" data-unit-label>CM</span></label><input type="number" id="h_diameter"></div>
+            <div><label>Length <span class="unit-tag" data-unit-label>CM</span></label><input type="number" id="h_length"></div>
           </div>
         </div>
-
         <hr class="divider">
-
         <div class="mode-row">
-          <div class="label-block">
-            <div class="t">Outer Dimensions Measured?</div>
-            <div class="d">Flip on if you measured the tank from outside</div>
-          </div>
-          <label class="switch">
-            <input type="checkbox" id="measureModeSwitch">
-            <span class="track"><span class="thumb"></span></span>
-          </label>
+          <div><div style="font-weight:700;">Outer Measured?</div><div style="font-size:12px; color:var(--text-faint);">Flip if measured outside</div></div>
+          <label class="switch"><input type="checkbox" id="measureModeSwitch"><span class="track"><span class="thumb"></span></span></label>
         </div>
         <div class="field" id="wallThicknessField" style="display:none;">
-          <label>Wall Thickness <span class="unit-tag">MM</span></label>
-          <input type="number" id="wallThickness" step="0.1" min="0" value="0">
-          <small class="desc">Subtracted automatically to calculate true inner volume.</small>
+          <label>Wall Thickness <span class="unit-tag">MM</span></label><input type="number" id="wallThickness" value="0">
         </div>
-
         <hr class="divider">
-
-        <div class="field">
-          <label for="customTankName">Save Current Tank As</label>
-          <input type="text" id="customTankName" placeholder="Enter tank name...">
-        </div>
-        <button class="btn btn-ghost" id="saveTankBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
-          Save Custom Tank
-        </button>
+        <div class="field"><label>Save Current Tank</label><input type="text" id="customTankName" placeholder="Enter name..."></div>
+        <button class="btn btn-ghost" id="saveTankBtn">Save Custom Tank</button>
         <div id="savedTanksList" style="margin-top:20px;"></div>
       </section>
     </div>
 
-    <!-- ==========================================================================
-         RIGHT COLUMN — REQUIRED VOLUME & VISUALIZER
-         ========================================================================== -->
     <div class="col-right">
-      
       <section class="panel">
-        <div class="panel-head">
-          <div><div class="tag">02 · Input Requirement</div><h2>Required Batch</h2></div>
+        <div class="panel-head"><div><div class="tag">02 · Input Requirement</div><h2>Calculation Mode</h2></div></div>
+        
+        <div class="segmented" id="calcModeToggle" style="width:100%; display:flex; margin-bottom: 16px;">
+          <button data-mode="vol2height" class="active" style="flex:1; border-radius: 999px 0 0 999px;">Liters ➔ Height</button>
+          <button data-mode="height2vol" style="flex:1; border-radius: 0 999px 999px 0;">Height ➔ Liters</button>
         </div>
-        <div class="field" style="margin-bottom:0;">
+
+        <div class="field" id="volInputGroup" style="margin-bottom:0;">
           <label>Target Water Volume <span class="unit-tag">LITERS</span></label>
-          <input type="number" id="requiredLiters" step="1" min="0" placeholder="e.g. 350" style="font-size: 24px; font-weight: 700; height: 64px; color: var(--teal);">
+          <input type="number" id="requiredLiters" placeholder="e.g. 350" style="font-size: 24px; font-weight: 700; height: 64px; color: var(--teal);">
+        </div>
+        
+        <div class="field" id="heightInputGroup" style="margin-bottom:0; display:none;">
+          <label>Target Fill Height <span class="unit-tag" data-unit-label>CM</span></label>
+          <input type="number" id="requiredHeight" placeholder="e.g. 50" style="font-size: 24px; font-weight: 700; height: 64px; color: var(--teal);">
         </div>
       </section>
 
       <section class="panel">
-        <div class="panel-head">
-          <div><div class="tag">03 · Live Visualizer</div><h2>Fill Status</h2></div>
-        </div>
-
-        <div class="viz-stage">
-          <div class="viz-svg-holder">
-            <svg id="tankSvg" viewBox="0 0 240 320" xmlns="http://www.w3.org/2000/svg"></svg>
-          </div>
-        </div>
-
-        <div id="statusBanner" class="status-banner ok">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
-          <span id="statusText">Enter tank dimensions and target volume to calculate.</span>
-        </div>
-
-        <div class="readout-grid single-readout">
+        <div class="panel-head"><div><div class="tag">03 · Live Visualizer</div><h2>Fill Status</h2></div></div>
+        <div class="viz-stage"><div class="viz-svg-holder"><svg id="tankSvg" viewBox="0 0 240 320"></svg></div></div>
+        <div id="statusBanner" class="status-banner ok"><span id="statusText">Enter details to calculate.</span></div>
+        <div class="readout-grid">
           <div class="readout accent">
-            <div class="label">Target Fill Height</div>
+            <div class="label" id="readoutLabel">Target Fill Height</div>
             <div class="value" id="outHeight">0.0<span class="unit">cm</span></div>
           </div>
         </div>
       </section>
-
     </div>
   </div>
 </div>
@@ -607,609 +292,165 @@ html[data-theme="light"] .icon-btn:hover { background: rgba(16,42,67,0.05); }
 (function(){
 "use strict";
 
-/* ==========================================================================
-   1. STATIC TANK DATABASE (inner dimensions, centimeters)
-   ========================================================================== */
 const tankDB = {
   arpico: { "500": { d: 83,  h: 109 }, "1000": { d: 105, h: 143 }, "2000": { d: 133, h: 162 }, "5000": { d: 196, h: 191 } },
   anton:  { "500": { d: 84,  h: 108 }, "1000": { d: 106, h: 141 }, "2000": { d: 134, h: 160 }, "5000": { d: 198, h: 188 } },
   pes:    { "500": { d: 82,  h: 110 }, "1000": { d: 104, h: 145 }, "2000": { d: 132, h: 165 }, "5000": { d: 195, h: 195 } },
   ruby:   { "500": { d: 83,  h: 110 }, "1000": { d: 105, h: 142 }, "2000": { d: 135, h: 160 }, "5000": { d: 197, h: 190 } }
 };
-const BRAND_LABELS = { arpico: "Arpico", anton: "Anton", pes: "PES", ruby: "Ruby" };
-const CUSTOM_STORAGE_KEY = "flowcalc_customTanks_v5";
-
 const UNIT_TO_CM = { cm: 1, in: 2.54, ft: 30.48, m: 100 };
 const UNIT_LABEL = { cm: "CM", in: "IN", ft: "FT", m: "M" };
 
-/* ==========================================================================
-   2. APPLICATION STATE
-   ========================================================================== */
 const state = {
-  unit: "cm",
-  theme: "light", // Defaulted to Light theme
-  brand: "arpico",
-  capacity: "1000",
-  shape: "vertical",
-  dims: {
-    diameter: 105, height: 143,
-    bottomDiameter: 105, topDiameter: 90,
-    length: 200
-  },
-  measurementMode: "inner",
-  wallThicknessMm: 0,
-  requiredLiters: null,
-  isCustomSource: false
+  unit: "cm", theme: "light", brand: "arpico", capacity: "1000", shape: "vertical",
+  dims: { diameter: 105, height: 143, bottomDiameter: 105, topDiameter: 90, length: 200 },
+  measurementMode: "inner", wallThicknessMm: 0, requiredLiters: null, requiredHeight: null, calcMode: "vol2height"
 };
 
-/* ==========================================================================
-   3. GEOMETRY / VOLUME MATH
-   ========================================================================== */
-function volCylinder(diameter, h){
-  const r = diameter / 2;
-  return Math.PI * r * r * Math.max(0, h);
+function volCylinder(d, h){ return Math.PI * (d/2)**2 * Math.max(0, h); }
+function volFrustum(b, t, H, h){ 
+  if(H<=0) return 0; 
+  let hh = Math.max(0, Math.min(h, H)); 
+  let rh = (b/2) + ((t/2)-(b/2))*(hh/H); 
+  return (Math.PI*hh/3)*((b/2)**2 + (b/2)*rh + rh**2); 
 }
-
-function volFrustum(bottomDiameter, topDiameter, totalHeight, h){
-  if (totalHeight <= 0) return 0;
-  const R = bottomDiameter / 2;
-  const rTop = topDiameter / 2;
-  const hh = Math.max(0, Math.min(h, totalHeight));
-  const rh = R + (rTop - R) * (hh / totalHeight);
-  return (Math.PI * hh / 3) * (R * R + R * rh + rh * rh);
+function volHorizontal(d, l, h){ 
+  let hh = Math.max(0, Math.min(h, d)); 
+  if(hh<=0) return 0; if(hh>=d) return Math.PI*(d/2)**2 * l; 
+  let r = d/2, term = r-hh; 
+  let area = r**2 * Math.acos(term/r) - term * Math.sqrt(Math.max(0, 2*r*hh - hh**2)); 
+  return area * l; 
 }
-
-function volHorizontal(diameter, length, h){
-  const r = diameter / 2;
-  const hh = Math.max(0, Math.min(h, diameter));
-  if (hh <= 0) return 0;
-  if (hh >= diameter) return Math.PI * r * r * length;
-  const term = r - hh;
-  const clampedRatio = Math.max(-1, Math.min(1, term / r));
-  const area = r * r * Math.acos(clampedRatio) - term * Math.sqrt(Math.max(0, 2 * r * hh - hh * hh));
-  return area * length;
+function solveHeightForVolume(volFn, target, maxH){
+  let lo=0, hi=maxH; for(let i=0; i<60; i++){ let mid=(lo+hi)/2; if(volFn(mid)<target) lo=mid; else hi=mid; } return (lo+hi)/2;
 }
-
-function solveHeightForVolume(volFn, targetVolume, maxHeight){
-  let lo = 0, hi = maxHeight;
-  for (let i = 0; i < 100; i++){
-    const mid = (lo + hi) / 2;
-    if (volFn(mid) < targetVolume) lo = mid; else hi = mid;
-  }
-  return (lo + hi) / 2;
-}
-
 function getEffectiveDims(){
-  const tCm = state.measurementMode === "outer" ? (state.wallThicknessMm / 10) : 0;
-  const d = state.dims;
-  if (state.shape === "vertical"){
-    return { diameter: d.diameter - 2 * tCm, height: d.height - 2 * tCm };
-  }
-  if (state.shape === "tapered"){
-    return {
-      bottomDiameter: d.bottomDiameter - 2 * tCm,
-      topDiameter: d.topDiameter - 2 * tCm,
-      height: d.height - 2 * tCm
-    };
-  }
-  return { diameter: d.diameter - 2 * tCm, length: d.length - 2 * tCm };
+  let t = state.measurementMode === "outer" ? state.wallThicknessMm/10 : 0; let d = state.dims;
+  if(state.shape==="vertical") return { diameter: d.diameter-2*t, height: d.height-2*t };
+  if(state.shape==="tapered") return { bottomDiameter: d.bottomDiameter-2*t, topDiameter: d.topDiameter-2*t, height: d.height-2*t };
+  return { diameter: d.diameter-2*t, length: d.length-2*t };
 }
-
 function getVolFnAndMaxHeight(eff){
-  if (state.shape === "vertical"){
-    return { volFn: h => volCylinder(eff.diameter, h), maxHeight: eff.height };
-  }
-  if (state.shape === "tapered"){
-    return { volFn: h => volFrustum(eff.bottomDiameter, eff.topDiameter, eff.height, h), maxHeight: eff.height };
-  }
+  if(state.shape==="vertical") return { volFn: h => volCylinder(eff.diameter, h), maxHeight: eff.height };
+  if(state.shape==="tapered") return { volFn: h => volFrustum(eff.bottomDiameter, eff.topDiameter, eff.height, h), maxHeight: eff.height };
   return { volFn: h => volHorizontal(eff.diameter, eff.length, h), maxHeight: eff.diameter };
 }
+function cmToUnit(cm, u){ return cm / UNIT_TO_CM[u]; }
+function unitToCm(v, u){ return v * UNIT_TO_CM[u]; }
+function fmt(n, dp){ return isFinite(n) ? n.toLocaleString(undefined,{minimumFractionDigits:dp,maximumFractionDigits:dp}) : "—"; }
 
-function cmToUnit(cm, unit){ return cm / UNIT_TO_CM[unit]; }
-function unitToCm(val, unit){ return val * UNIT_TO_CM[unit]; }
-function fmt(n, dp){
-  if (!isFinite(n)) return "—";
-  return n.toLocaleString(undefined, { minimumFractionDigits: dp, maximumFractionDigits: dp });
-}
-
-/* ==========================================================================
-   4. DOM REFERENCES
-   ========================================================================== */
 const $ = id => document.getElementById(id);
-const brandSelect = $("brandSelect");
-const capacitySelect = $("capacitySelect");
-const capacityField = $("capacityField");
-const savedTankField = $("savedTankField");
-const savedTankSelect = $("savedTankSelect");
-const measureModeSwitch = $("measureModeSwitch");
-const wallThicknessField = $("wallThicknessField");
-const wallThicknessInput = $("wallThickness");
-const requiredLitersInput = $("requiredLiters");
-const customTankNameInput = $("customTankName");
-const savedTanksListEl = $("savedTanksList");
-const statusBanner = $("statusBanner");
-const statusText = $("statusText");
 
-const dimInputs = {
-  v_diameter: $("v_diameter"), v_height: $("v_height"),
-  t_bottom: $("t_bottom"), t_top: $("t_top"), t_height: $("t_height"),
-  h_diameter: $("h_diameter"), h_length: $("h_length")
-};
+Object.keys(tankDB).forEach(k => { let o = document.createElement("option"); o.value=k; o.textContent=k.toUpperCase(); $("brandSelect").appendChild(o); });
+function popCap(){ $("capacitySelect").innerHTML=""; Object.keys(tankDB[state.brand]||{}).forEach(c => { let o = document.createElement("option"); o.value=c; o.textContent=c+" L"; $("capacitySelect").appendChild(o); }); }
 
-/* ==========================================================================
-   5. DROPDOWNS & STORAGE
-   ========================================================================== */
-function populateBrandSelect(){
-  brandSelect.innerHTML = "";
-  Object.keys(tankDB).forEach(key => {
-    const opt = document.createElement("option");
-    opt.value = key; opt.textContent = BRAND_LABELS[key] || key;
-    brandSelect.appendChild(opt);
-  });
-  const customOpt = document.createElement("option");
-  customOpt.value = "custom"; customOpt.textContent = "Custom / Manual Entry";
-  brandSelect.appendChild(customOpt);
-  brandSelect.value = state.brand;
-}
-function populateCapacitySelect(){
-  capacitySelect.innerHTML = "";
-  const brandData = tankDB[state.brand];
-  if (!brandData) return;
-  Object.keys(brandData).forEach(cap => {
-    const opt = document.createElement("option");
-    opt.value = cap; opt.textContent = Number(cap).toLocaleString() + " L";
-    capacitySelect.appendChild(opt);
-  });
-  capacitySelect.value = state.capacity;
+$("brandSelect").addEventListener("change", e => { state.brand = e.target.value; popCap(); loadPreset(); calcRender(); });
+$("capacitySelect").addEventListener("change", e => { state.capacity = e.target.value; loadPreset(); calcRender(); });
+function loadPreset(){ let p = tankDB[state.brand]?.[state.capacity]; if(p) { state.dims.diameter=p.d; state.dims.height=p.h; refreshDims(); } }
+
+document.querySelectorAll(".shape-tab").forEach(t => t.addEventListener("click", e => {
+  state.shape = t.dataset.shape; 
+  document.querySelectorAll(".shape-tab").forEach(tt=>tt.classList.toggle("active", tt===t));
+  $("dimsVertical").style.display = state.shape==="vertical"?"block":"none";
+  $("dimsTapered").style.display = state.shape==="tapered"?"block":"none";
+  $("dimsHorizontal").style.display = state.shape==="horizontal"?"block":"none";
+  calcRender();
+}));
+
+function bindInp(id, setter){ $(id).addEventListener("input", e=>{ let v=parseFloat(e.target.value); setter(isFinite(v)?unitToCm(v,state.unit):0); calcRender(); }); }
+bindInp("v_diameter", v=>state.dims.diameter=v); bindInp("v_height", v=>state.dims.height=v);
+bindInp("t_bottom", v=>state.dims.bottomDiameter=v); bindInp("t_top", v=>state.dims.topDiameter=v); bindInp("t_height", v=>state.dims.height=v);
+bindInp("h_diameter", v=>state.dims.diameter=v); bindInp("h_length", v=>state.dims.length=v);
+function refreshDims(){
+  $("v_diameter").value = cmToUnit(state.dims.diameter, state.unit).toFixed(1); $("v_height").value = cmToUnit(state.dims.height, state.unit).toFixed(1);
 }
 
-function loadCustomTanks(){
-  try{
-    const raw = localStorage.getItem(CUSTOM_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  }catch(e){ return []; }
-}
-function saveCustomTanks(list){
-  try{ localStorage.setItem(CUSTOM_STORAGE_KEY, JSON.stringify(list)); }catch(e){}
-}
-function shapeLabel(shape){
-  return shape === "vertical" ? "Vertical" : shape === "tapered" ? "Tapered" : "Horizontal";
-}
-function renderSavedTanksList(){
-  const list = loadCustomTanks();
-  savedTanksListEl.innerHTML = "";
-  savedTankSelect.innerHTML = '<option value="">— choose a saved tank —</option>';
-
-  if (list.length === 0){
-    savedTanksListEl.innerHTML = '<div class="empty-note">No custom tanks saved yet.</div>';
-    savedTankField.style.display = "none";
-    return;
-  }
-  savedTankField.style.display = state.brand === "custom" ? "block" : "none";
-
-  list.forEach(t => {
-    const opt = document.createElement("option");
-    opt.value = t.id; opt.textContent = t.name;
-    savedTankSelect.appendChild(opt);
-
-    const row = document.createElement("div");
-    row.className = "saved-row";
-    row.innerHTML = `
-      <div>
-        <div class="name">${escapeHtml(t.name)}</div>
-        <div class="meta">${shapeLabel(t.shape)} · saved ${new Date(t.createdAt).toLocaleDateString()}</div>
-      </div>
-      <button class="load-btn" title="Load this tank" data-id="${t.id}" data-action="load">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-3.5-7.1"/><path d="M21 4v6h-6"/></svg>
-      </button>
-      <button title="Delete" data-id="${t.id}" data-action="delete">
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-      </button>`;
-    savedTanksListEl.appendChild(row);
-  });
-}
-function escapeHtml(str){
-  const div = document.createElement("div"); div.textContent = str; return div.innerHTML;
-}
-
-savedTanksListEl.addEventListener("click", (e) => {
-  const btn = e.target.closest("button[data-action]");
-  if (!btn) return;
-  const id = btn.getAttribute("data-id");
-  const action = btn.getAttribute("data-action");
-  const list = loadCustomTanks();
-  const tank = list.find(t => t.id === id);
-  if (action === "delete"){
-    saveCustomTanks(list.filter(t => t.id !== id));
-    renderSavedTanksList();
-  } else if (action === "load" && tank){
-    applyCustomTank(tank);
-  }
-});
-savedTankSelect.addEventListener("change", () => {
-  const id = savedTankSelect.value;
-  if (!id) return;
-  const tank = loadCustomTanks().find(t => t.id === id);
-  if (tank) applyCustomTank(tank);
-});
-function applyCustomTank(tank){
-  state.brand = "custom";
-  state.isCustomSource = true;
-  state.shape = tank.shape;
-  Object.assign(state.dims, tank.dims);
-  state.measurementMode = tank.measurementMode || "inner";
-  state.wallThicknessMm = tank.wallThicknessMm || 0;
-  brandSelect.value = "custom";
-  syncShapeTabsUI();
-  syncMeasurementModeUI();
-  refreshDimInputsFromState();
-  capacityField.style.display = "none";
-  savedTankField.style.display = "block";
-  calculateAndRender();
-}
-$("saveTankBtn").addEventListener("click", () => {
-  const name = (customTankNameInput.value || "").trim();
-  if (!name){
-    customTankNameInput.focus();
-    customTankNameInput.style.borderColor = "var(--red)";
-    setTimeout(() => { customTankNameInput.style.borderColor = "var(--input-border)"; }, 900);
-    return;
-  }
-  const list = loadCustomTanks();
-  list.unshift({
-    id: "tank_" + Date.now().toString(36),
-    name,
-    shape: state.shape,
-    dims: JSON.parse(JSON.stringify(state.dims)),
-    measurementMode: state.measurementMode,
-    wallThicknessMm: state.wallThicknessMm,
-    createdAt: Date.now()
-  });
-  saveCustomTanks(list);
-  customTankNameInput.value = "";
-  renderSavedTanksList();
+$("calcModeToggle").addEventListener("click", e => {
+  if (e.target.tagName !== "BUTTON") return;
+  document.querySelectorAll("#calcModeToggle button").forEach(b => b.classList.remove("active"));
+  e.target.classList.add("active");
+  state.calcMode = e.target.getAttribute("data-mode");
+  $("volInputGroup").style.display = state.calcMode === "vol2height" ? "block" : "none";
+  $("heightInputGroup").style.display = state.calcMode === "height2vol" ? "block" : "none";
+  calcRender();
 });
 
-/* ==========================================================================
-   6. UI <-> STATE WIRING
-   ========================================================================== */
-brandSelect.addEventListener("change", () => {
-  state.brand = brandSelect.value;
-  if (state.brand === "custom"){
-    state.isCustomSource = true;
-    capacityField.style.display = "none";
-    renderSavedTanksList();
-  } else {
-    state.isCustomSource = false;
-    capacityField.style.display = "block";
-    savedTankField.style.display = "none";
-    populateCapacitySelect();
-    loadPresetIntoState();
-  }
-  calculateAndRender();
-});
-capacitySelect.addEventListener("change", () => {
-  state.capacity = capacitySelect.value;
-  loadPresetIntoState();
-  calculateAndRender();
-});
-function loadPresetIntoState(){
-  const preset = tankDB[state.brand] && tankDB[state.brand][state.capacity];
-  if (!preset) return;
-  state.shape = "vertical";
-  state.dims.diameter = preset.d;
-  state.dims.height = preset.h;
-  state.measurementMode = "inner";
-  state.wallThicknessMm = 0;
-  syncShapeTabsUI();
-  syncMeasurementModeUI();
-  refreshDimInputsFromState();
-}
+$("requiredLiters").addEventListener("input", e => { let v=parseFloat(e.target.value); state.requiredLiters = isFinite(v)?v:null; calcRender(); });
+$("requiredHeight").addEventListener("input", e => { let v=parseFloat(e.target.value); state.requiredHeight = isFinite(v)?unitToCm(v, state.unit):null; calcRender(); });
 
-document.querySelectorAll(".shape-tab").forEach(tab => {
-  tab.addEventListener("click", () => {
-    state.shape = tab.getAttribute("data-shape");
-    syncShapeTabsUI();
-    calculateAndRender();
-  });
-});
-function syncShapeTabsUI(){
-  document.querySelectorAll(".shape-tab").forEach(t => t.classList.toggle("active", t.getAttribute("data-shape") === state.shape));
-  $("dimsVertical").style.display = state.shape === "vertical" ? "block" : "none";
-  $("dimsTapered").style.display = state.shape === "tapered" ? "block" : "none";
-  $("dimsHorizontal").style.display = state.shape === "horizontal" ? "block" : "none";
-}
-
-function bindDimInput(el, setter){
-  el.addEventListener("input", () => {
-    const raw = parseFloat(el.value);
-    const cmVal = isFinite(raw) ? unitToCm(raw, state.unit) : 0;
-    setter(cmVal);
-    state.isCustomSource = true;
-    calculateAndRender();
-  });
-}
-bindDimInput(dimInputs.v_diameter, v => state.dims.diameter = v);
-bindDimInput(dimInputs.v_height,   v => state.dims.height = v);
-bindDimInput(dimInputs.t_bottom,   v => state.dims.bottomDiameter = v);
-bindDimInput(dimInputs.t_top,      v => state.dims.topDiameter = v);
-bindDimInput(dimInputs.t_height,   v => state.dims.height = v);
-bindDimInput(dimInputs.h_diameter, v => state.dims.diameter = v);
-bindDimInput(dimInputs.h_length,   v => state.dims.length = v);
-
-function refreshDimInputsFromState(){
-  dimInputs.v_diameter.value = round2(cmToUnit(state.dims.diameter, state.unit));
-  dimInputs.v_height.value   = round2(cmToUnit(state.dims.height, state.unit));
-  dimInputs.t_bottom.value   = round2(cmToUnit(state.dims.bottomDiameter, state.unit));
-  dimInputs.t_top.value      = round2(cmToUnit(state.dims.topDiameter, state.unit));
-  dimInputs.t_height.value   = round2(cmToUnit(state.dims.height, state.unit));
-  dimInputs.h_diameter.value = round2(cmToUnit(state.dims.diameter, state.unit));
-  dimInputs.h_length.value   = round2(cmToUnit(state.dims.length, state.unit));
-}
-function round2(n){ return Math.round(n * 100) / 100; }
-
-measureModeSwitch.addEventListener("change", () => {
-  state.measurementMode = measureModeSwitch.checked ? "outer" : "inner";
-  syncMeasurementModeUI();
-  calculateAndRender();
-});
-function syncMeasurementModeUI(){
-  measureModeSwitch.checked = state.measurementMode === "outer";
-  wallThicknessField.style.display = state.measurementMode === "outer" ? "block" : "none";
-}
-wallThicknessInput.addEventListener("input", () => {
-  state.wallThicknessMm = parseFloat(wallThicknessInput.value) || 0;
-  calculateAndRender();
+$("unitToggle").addEventListener("click", e=>{
+  let b = e.target.closest("button"); if(!b) return; state.unit = b.dataset.unit;
+  document.querySelectorAll("#unitToggle button").forEach(btn=>btn.classList.toggle("active", btn===b));
+  document.querySelectorAll("[data-unit-label]").forEach(el=>el.textContent=UNIT_LABEL[state.unit]);
+  refreshDims(); calcRender();
 });
 
-requiredLitersInput.addEventListener("input", () => {
-  const v = parseFloat(requiredLitersInput.value);
-  state.requiredLiters = isFinite(v) ? v : null;
-  calculateAndRender();
-});
-
-document.getElementById("unitToggle").addEventListener("click", (e) => {
-  const btn = e.target.closest("button[data-unit]");
-  if (!btn) return;
-  state.unit = btn.getAttribute("data-unit");
-  document.querySelectorAll("#unitToggle button").forEach(b => b.classList.toggle("active", b === btn));
-  document.querySelectorAll("[data-unit-label]").forEach(el => el.textContent = UNIT_LABEL[state.unit]);
-  refreshDimInputsFromState();
-  calculateAndRender();
-});
-
-const themeIcon = $("themeIcon");
 $("themeToggle").addEventListener("click", () => {
-  state.theme = state.theme === "light" ? "dark" : "light";
+  state.theme = state.theme==="light"?"dark":"light";
   document.documentElement.setAttribute("data-theme", state.theme);
-  
-  // Icon Update
-  themeIcon.innerHTML = state.theme === "light"
-    ? '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>'
-    : '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
 });
 
-/* ==========================================================================
-   7. HIGHLY ANIMATED SVG VISUALIZER
-   ========================================================================== */
-const svg = $("tankSvg");
-const FRAME_TOP = 20, FRAME_BOTTOM = 300, FRAME_H = FRAME_BOTTOM - FRAME_TOP;
-
-function buildStaticDefs(){
-  return `
-  <defs>
-    <clipPath id="tankClip"><g id="clipShape"></g></clipPath>
-    <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="var(--water-b)"/>
-      <stop offset="40%" stop-color="var(--water-a)"/>
-      <stop offset="100%" stop-color="var(--water-c)"/>
-    </linearGradient>
-    <linearGradient id="waterGradOverflow" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="var(--water-overflow-b)"/>
-      <stop offset="100%" stop-color="var(--water-overflow-a)"/>
-    </linearGradient>
-    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="var(--glass-1)"/>
-      <stop offset="20%" stop-color="var(--glass-2)"/>
-      <stop offset="80%" stop-color="var(--glass-2)"/>
-      <stop offset="100%" stop-color="var(--glass-1)"/>
-    </linearGradient>
-  </defs>`;
-}
-
-function getShapeGeometry(){
-  if (state.shape === "vertical"){
-    const x1 = 55, x2 = 185; 
-    return {
-      outline: `M${x1},${FRAME_TOP+8} Q${x1},${FRAME_TOP} ${x1+10},${FRAME_TOP} L${x2-10},${FRAME_TOP} Q${x2},${FRAME_TOP} ${x2},${FRAME_TOP+8}
-                 L${x2},${FRAME_BOTTOM-8} Q${x2},${FRAME_BOTTOM} ${x2-10},${FRAME_BOTTOM} L${x1+10},${FRAME_BOTTOM} Q${x1},${FRAME_BOTTOM} ${x1},${FRAME_BOTTOM-8} Z`,
-      clip: `<rect x="${x1}" y="${FRAME_TOP}" width="${x2-x1}" height="${FRAME_H}" rx="10"/>`,
-      bodyLeft: x1, bodyRight: x2, width: x2-x1
-    };
-  }
-  if (state.shape === "tapered"){
-    const bottomD = state.dims.bottomDiameter || 1;
-    const topD = state.dims.topDiameter || 1;
-    const ratio = Math.max(0.35, Math.min(1, topD / bottomD));
-    const bx1 = 50, bx2 = 190;
-    const bottomWidth = bx2 - bx1;
-    const topWidth = bottomWidth * ratio;
-    const tx1 = 120 - topWidth / 2, tx2 = 120 + topWidth / 2;
-    return {
-      outline: `M${bx1},${FRAME_BOTTOM} L${bx2},${FRAME_BOTTOM} L${tx2},${FRAME_TOP} L${tx1},${FRAME_TOP} Z`,
-      clip: `<polygon points="${bx1},${FRAME_BOTTOM} ${bx2},${FRAME_BOTTOM} ${tx2},${FRAME_TOP} ${tx1},${FRAME_TOP}"/>`,
-      bodyLeft: Math.min(bx1, tx1), bodyRight: Math.max(bx2, tx2), width: bx2-bx1
-    };
-  }
-  const cx = 120, cy = (FRAME_TOP + FRAME_BOTTOM) / 2, r = FRAME_H / 2;
-  return {
-    outline: `M${cx-r},${cy} a${r},${r} 0 1,0 ${r*2},0 a${r},${r} 0 1,0 -${r*2},0 Z`,
-    clip: `<circle cx="${cx}" cy="${cy}" r="${r}"/>`,
-    bodyLeft: cx - r, bodyRight: cx + r, width: r*2
-  };
-}
-
-function generateBubbles(count, w, bodyLeft) {
-    let bubbles = '';
-    for(let i=0; i<count; i++) {
-        const cx = bodyLeft + 15 + Math.random() * (w - 30);
-        const r = 1.2 + Math.random() * 2.5;
-        const dur = 2 + Math.random() * 2.5;
-        const delay = Math.random() * 2.5;
-        bubbles += `<circle cx="${cx}" cy="${FRAME_BOTTOM}" r="${r}" class="bubble" style="animation-duration: ${dur}s; animation-delay: ${delay}s;"/>`;
-    }
-    return bubbles;
-}
-
-function buildWaveGroup(pct, overflow, geo){
-  const w = (geo.bodyRight - geo.bodyLeft) + 80;
-  const scaleY = pct;
-  const translationY = FRAME_BOTTOM * (1 - scaleY) + FRAME_TOP * scaleY;
-  
-  const wavePath = (yOffset) => {
-    let d = `M-40,${yOffset}`;
-    for (let x = -40; x <= w + 40; x += 20){
-      const peak = ((x / 20) % 2 === 0) ? yOffset - 4 : yOffset + 4;
-      d += ` Q${x+10},${peak} ${x+20},${yOffset}`;
-    }
-    d += ` L${w+40},${FRAME_BOTTOM+50} L-40,${FRAME_BOTTOM+50} Z`;
-    return d;
-  };
-  const fill = overflow ? "url(#waterGradOverflow)" : "url(#waterGrad)";
-  const bubbles = generateBubbles(15, geo.width, geo.bodyLeft);
-
-  return `
-    <g clip-path="url(#tankClip)">
-      <g class="water-group" style="transform: translateY(${pct === 0 ? FRAME_BOTTOM : (FRAME_BOTTOM - pct*FRAME_H)}px);">
-        <!-- 3 Layers of waves -->
-        <path class="wave-c" d="${wavePath(0)}" fill="${fill}"></path>
-        <path class="wave-b" d="${wavePath(0)}" fill="${fill}"></path>
-        <path class="wave-a" d="${wavePath(0)}" fill="${fill}"></path>
-        ${pct > 0.05 ? bubbles : ''}
-      </g>
-    </g>`;
-}
-
-function renderVisualizer(res){
-  const geo = getShapeGeometry();
-  const pct = res ? Math.max(0, Math.min(1, res.fillPct / 100)) : 0;
-  const overflow = res ? res.overflow : false;
-
-  let ticks = "";
-  if (res){
-    const steps = 5;
-    for (let i = 0; i <= steps; i++){
-      const cmVal = (res.maxHeight / steps) * i;
-      const y = FRAME_BOTTOM - (cmVal / res.maxHeight) * FRAME_H;
-      const label = fmt(cmToUnit(cmVal, state.unit), state.unit === "cm" || state.unit === "in" ? 0 : 1);
-      ticks += `
-        <line x1="30" y1="${y}" x2="38" y2="${y}" stroke="var(--text-faint)" stroke-width="1"/>
-        <text x="26" y="${y+3}" font-family="var(--font-mono)" font-size="8" fill="var(--text-faint)" text-anchor="end">${label}</text>`;
-    }
-  }
-
-  let targetMarkup = "";
-  if (res && res.valid){
-    const ty = FRAME_BOTTOM - pct * FRAME_H;
-    targetMarkup = `
-      <line class="target-line" x1="${geo.bodyLeft-4}" y1="${ty}" x2="${geo.bodyRight+4}" y2="${ty}" stroke="${overflow ? 'var(--red)' : 'var(--amber)'}" stroke-width="2.5" stroke-dasharray="5 5"/>
-      <text class="target-line" x="${geo.bodyRight+8}" y="${ty+4}" font-family="var(--font-mono)" font-size="11" font-weight="700" fill="${overflow ? 'var(--red)' : 'var(--amber)'}">${overflow ? 'MAX' : fmt(cmToUnit(res.height, state.unit),1)+UNIT_LABEL[state.unit]}</text>`;
-  }
-
-  svg.innerHTML = `
-    ${buildStaticDefs()}
-    <rect x="0" y="0" width="240" height="320" fill="none"/>
-    ${ticks}
-    <path d="${geo.outline}" fill="var(--tank-fill)" stroke="var(--tank-outline)" stroke-width="2.5"/>
-    ${res ? buildWaveGroup(pct, overflow, geo) : ""}
-    <path d="${geo.outline}" fill="url(#glass)" stroke="none" opacity="1"/>
-    ${targetMarkup}
-  `;
-  const clipShape = svg.querySelector("#clipShape");
-  if (clipShape) clipShape.innerHTML = geo.clip;
-}
-
-/* ==========================================================================
-   8. CORE CALCULATION PIPELINE
-   ========================================================================== */
 function calculate(){
-  const eff = getEffectiveDims();
-  const dimsValid = Object.values(eff).every(v => isFinite(v) && v > 0);
-  if (!dimsValid){
-    return { valid: false, reason: "dims" };
-  }
-  const { volFn, maxHeight } = getVolFnAndMaxHeight(eff);
-  const maxVolCm3 = volFn(maxHeight);
-  const maxCapacityL = maxVolCm3 / 1000;
+  let eff = getEffectiveDims();
+  if(Object.values(eff).some(v=>!isFinite(v)||v<=0)) return {valid:false, reason:"dims"};
+  let { volFn, maxHeight } = getVolFnAndMaxHeight(eff);
+  let maxVolCm3 = volFn(maxHeight);
+  let maxCapL = maxVolCm3 / 1000;
 
-  if (state.requiredLiters === null || state.requiredLiters <= 0){
-    return { valid: false, reason: "volume", maxHeight, maxCapacityL, eff };
-  }
-
-  const targetVolCm3 = state.requiredLiters * 1000;
-  const overflow = targetVolCm3 > maxVolCm3;
-  const solveTarget = overflow ? maxVolCm3 : targetVolCm3;
-  const height = solveHeightForVolume(volFn, solveTarget, maxHeight);
-  const fillPct = maxHeight > 0 ? (height / maxHeight) * 100 : 0;
-  const remainingL = Math.max(0, maxCapacityL - state.requiredLiters);
-
-  return {
-    valid: true, overflow, height, maxHeight, fillPct,
-    maxCapacityL, remainingL, eff, requiredLiters: state.requiredLiters
-  };
-}
-
-/* ==========================================================================
-   9. RENDER RESULTS TO DOM
-   ========================================================================== */
-function calculateAndRender(){
-  const res = calculate();
-
-  if (!res.valid){
-    if (res.reason === "dims"){
-      setBanner("error", "Enter valid, positive tank dimensions.");
-    } else {
-      setBanner("ok", "Enter the target water volume to calculate fill height.");
-    }
-    $("outHeight").innerHTML = `0.0<span class="unit">${UNIT_LABEL[state.unit]}</span>`;
-    renderVisualizer(res.maxCapacityL ? res : null);
+  if (state.calcMode === "vol2height") {
+    if(!state.requiredLiters || state.requiredLiters<=0) return {valid:false, reason:"req", maxCapL};
+    let target = state.requiredLiters*1000, overflow = target>maxVolCm3;
+    let h = solveHeightForVolume(volFn, overflow?maxVolCm3:target, maxHeight);
+    return { valid:true, mode:"v2h", h, maxCapL, pct: maxHeight>0?(h/maxHeight)*100:0, over: overflow, liters: state.requiredLiters };
   } else {
-    if (res.overflow){
-      setBanner("overflow", `⚠️ Overflow Warning! Required volume exceeds capacity. Limit batch to ${fmt(res.maxCapacityL,0)} L.`);
-    } else {
-      setBanner("ok", `Ready to fill. ${fmt(res.requiredLiters,0)} L fits safely within the tank.`);
-    }
-    $("outHeight").innerHTML = `${fmt(cmToUnit(res.height, state.unit),1)}<span class="unit">${UNIT_LABEL[state.unit]}</span>`;
-    renderVisualizer(res);
+    if(!state.requiredHeight || state.requiredHeight<=0) return {valid:false, reason:"req", maxCapL};
+    let h = state.requiredHeight, overflow = h>maxHeight;
+    let ch = overflow?maxHeight:h;
+    let calcLiters = volFn(ch)/1000;
+    return { valid:true, mode:"h2v", h:ch, maxCapL, pct: maxHeight>0?(ch/maxHeight)*100:0, over: overflow, liters: calcLiters };
   }
 }
 
-function setBanner(kind, text){
-  statusBanner.className = "status-banner " + kind;
-  statusText.textContent = text;
-  const icon = kind === "overflow" || kind === "error"
-    ? '<path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>'
-    : '<path d="M20 6 9 17l-5-5"/>';
-  statusBanner.querySelector("svg").innerHTML = icon;
-}
-
-/* ==========================================================================
-   10. INIT
-   ========================================================================== */
-function init(){
-  populateBrandSelect();
-  populateCapacitySelect();
-  loadPresetIntoState();
-  syncShapeTabsUI();
-  syncMeasurementModeUI();
-  renderSavedTanksList();
-  calculateAndRender();
+function calcRender(){
+  let res = calculate();
+  let readoutLbl = $("readoutLabel"), outH = $("outHeight"), stxt = $("statusText"), sb = $("statusBanner");
   
-  // Set initial icon to Moon (since light mode is default)
-  $("themeIcon").innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>';
+  if(!res.valid){
+    sb.className="status-banner ok"; stxt.textContent = res.reason==="dims"?"Enter valid dimensions.":"Enter target requirement.";
+    readoutLbl.textContent = state.calcMode==="vol2height"?"Target Fill Height":"Contained Volume";
+    outH.innerHTML = state.calcMode==="vol2height" ? `0.0<span class="unit">${UNIT_LABEL[state.unit]}</span>` : `0<span class="unit">L</span>`;
+    renderViz(0, false, null);
+  } else {
+    sb.className = res.over ? "status-banner overflow" : "status-banner ok";
+    if (res.mode === "v2h") {
+        stxt.textContent = res.over ? `Warning! Limit batch to ${fmt(res.maxCapL,0)} L.` : `Ready. ${fmt(res.liters,0)} L fits safely.`;
+        readoutLbl.textContent = "Target Fill Height";
+        outH.innerHTML = `${fmt(cmToUnit(res.h, state.unit),1)}<span class="unit">${UNIT_LABEL[state.unit]}</span>`;
+    } else {
+        stxt.textContent = res.over ? `Warning! Height exceeds tank max.` : `At this height, tank holds ${fmt(res.liters,0)} L.`;
+        readoutLbl.textContent = "Contained Volume";
+        outH.innerHTML = `${fmt(res.liters,0)}<span class="unit">L</span>`;
+    }
+    renderViz(res.pct, res.over, res);
+  }
 }
-init();
 
+function renderViz(pct, over, res){
+  pct = Math.max(0, Math.min(100, pct))/100;
+  let cx=120, yTop=20, yBot=300, H=280, tY = yBot - pct*H;
+  let water = pct>0 ? `<g style="transform:translateY(${yBot - pct*H}px)"><path d="M40,0 Q80,-5 120,0 T200,0 L200,300 L40,300 Z" fill="${over?'var(--red)':'var(--teal)'}" opacity="0.6"/></g>` : "";
+  let lineText = res ? (res.mode==="v2h" ? fmt(cmToUnit(res.h, state.unit),1)+UNIT_LABEL[state.unit] : fmt(res.liters,0)+" L") : "";
+  let line = res ? `<line x1="40" y1="${tY}" x2="200" y2="${tY}" stroke="${over?'var(--red)':'var(--amber)'}" stroke-width="2" stroke-dasharray="4"/><text x="205" y="${tY+4}" font-family="monospace" font-size="12" fill="${over?'var(--red)':'var(--amber)'}">${lineText}</text>` : "";
+  
+  $("tankSvg").innerHTML = `
+    <rect x="55" y="${yTop}" width="130" height="${H}" rx="10" fill="var(--tank-fill)" stroke="var(--tank-outline)" stroke-width="2.5"/>
+    <clipPath id="c"><rect x="55" y="${yTop}" width="130" height="${H}" rx="10"/></clipPath>
+    <g clip-path="url(#c)">${water}</g>
+    ${line}
+  `;
+}
+
+popCap(); loadPreset(); refreshDims(); calcRender();
 })();
 </script>
 </body>
