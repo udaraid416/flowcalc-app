@@ -8,7 +8,22 @@ import os
 from PIL import Image
 
 # ==========================================
-# 1. API KEY SETUP
+# 1. PAGE CONFIGURATION & CSS LOADING
+# ==========================================
+st.set_page_config(page_title="Smart Agri Console", layout="wide", initial_sidebar_state="collapsed")
+
+# Load Custom CSS (Animations & Styling)
+def local_css(file_name):
+    try:
+        with open(file_name, "r") as f:
+            st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+    except FileNotFoundError:
+        pass # Ignore error if file doesn't exist yet
+
+local_css("assets/style.css")
+
+# ==========================================
+# 2. API KEY SETUP
 # ==========================================
 try:
     API_KEY = st.secrets["GEMINI_API_KEY"]
@@ -17,9 +32,8 @@ except KeyError:
     st.warning("API Key not found! Please configure GEMINI_API_KEY in Streamlit Secrets.")
 
 # ==========================================
-# 2. DYNAMIC MODEL FETCHING (Error Fix)
+# 3. DYNAMIC MODEL FETCHING (Error Fix)
 # ==========================================
-# වැඩ කරන අලුත්ම මොඩල් එක dynamically හොයාගැනීම 
 @st.cache_resource
 def get_working_model_name():
     try:
@@ -39,11 +53,8 @@ If you receive an image or an audio snippet, analyze it and suggest remedies in 
 """
 
 # ==========================================
-# 3. PAGE CONFIGURATION
+# 4. READ HTML FOR FLOWCALC
 # ==========================================
-st.set_page_config(page_title="Smart Agri Console", layout="wide", initial_sidebar_state="collapsed")
-
-# Read HTML file for FlowCalc
 try:
     with open("index.html", "r", encoding="utf-8") as f:
         html_code = f.read()
@@ -51,7 +62,7 @@ except FileNotFoundError:
     html_code = "<h3>Error! index.html file not found. Ensure it is in the same directory as app.py.</h3>"
 
 # ==========================================
-# 4. TABS CREATION
+# 5. TABS CREATION
 # ==========================================
 tab1, tab2 = st.tabs(["💧 FlowCalc Engine", "🤖 Agri-Assistant AI"])
 
@@ -62,7 +73,7 @@ with tab1:
 # --- TAB 2: Agri-Assistant AI ---
 with tab2:
     st.header("🌱 Agri-Assistant (AI Bot)")
-    st.write("Do you have an issue with your crops? Upload a photo of a diseased leaf, or ask your question using the microphone.")
+    st.write("වගාවේ ගැටළුවක් තියෙනවද? කොළයක පින්තූරයක් දාන්න, නැත්නම් මයික් එකෙන් ප්‍රශ්නය අහන්න.")
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
@@ -70,7 +81,7 @@ with tab2:
     col1, col2 = st.columns(2)
     
     with col1:
-        st.markdown("**📸 Provide an Image**")
+        st.markdown("**📸 පින්තූරයක් ලබා දෙන්න**")
         img_file_buffer = st.camera_input("Take a photo")
         uploaded_file = st.file_uploader("Or Upload an Image", type=["jpg", "jpeg", "png"])
         
@@ -84,16 +95,17 @@ with tab2:
             st.image(img_to_send, caption="Uploaded Image", use_container_width=True)
 
     with col2:
-        st.markdown("**🎤 Ask via Microphone**")
+        st.markdown("**🎤 මයික්‍රෆෝනය හරහා අසන්න**")
         audio_bytes = audio_recorder(text="Click to Record", recording_color="#e84118", neutral_color="#00a8ff")
         
     st.divider()
     
+    # Render Chat History
     for msg in st.session_state.chat_history:
         with st.chat_message(msg["role"]):
             st.markdown(msg["content"])
 
-    user_query = st.chat_input("Type your question here...")
+    user_query = st.chat_input("ඔබේ ප්‍රශ්නය මෙහි ටයිප් කරන්න...")
     
     audio_query = False
     if audio_bytes and "last_audio" not in st.session_state:
@@ -105,7 +117,7 @@ with tab2:
 
     # Process Query
     if user_query or audio_query or img_to_send:
-        prompt_text = user_query if user_query else "Please analyze this audio or image and provide your answer in Sinhala."
+        prompt_text = user_query if user_query else "කරුණාකර මෙම පින්තූරය හෝ හඬ පටය පරීක්ෂා කර සිංහලෙන් පිළිතුරු දෙන්න."
         
         st.session_state.chat_history.append({"role": "user", "content": prompt_text})
         with st.chat_message("user"):
@@ -123,12 +135,12 @@ with tab2:
                 audio_file = genai.upload_file(path=tmp_audio_path)
                 contents.append(audio_file)
             except Exception as e:
-                st.error("Error sending audio. Please type your question.")
+                st.error("හඬපටය යැවීමේ ගැටළුවක්! කරුණාකර ප්‍රශ්නය ටයිප් කරන්න.")
 
         with st.chat_message("assistant"):
             with st.spinner("Analyzing... ⏳"):
                 try:
-                    # Initialize Model dynamically here!
+                    # Initialize Model dynamically
                     model_name = get_working_model_name()
                     model = genai.GenerativeModel(model_name, system_instruction=system_instruction)
                     
@@ -137,16 +149,16 @@ with tab2:
                     st.markdown(bot_reply)
                     st.session_state.chat_history.append({"role": "assistant", "content": bot_reply})
                     
-                    # Text to Speech
+                    # Text to Speech (Sinhala)
                     tts = gTTS(text=bot_reply, lang='si')
                     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmp_mp3:
                         tts.save(tmp_mp3.name)
                         st.audio(tmp_mp3.name, format="audio/mp3", autoplay=True)
                         
                 except Exception as e:
-                    st.error(f"Sorry, an error occurred. System Error: {e}")
+                    st.error(f"සමාවෙන්න, තාක්ෂණික දෝෂයක්. System Error: {e}")
 
-    # Report Download
+    # Report Download Option
     if len(st.session_state.chat_history) > 0:
         st.divider()
         report_text = "Agri-Assistant Daily Report\n================================================\n\n"
@@ -154,9 +166,13 @@ with tab2:
             role = "You" if msg["role"] == "user" else "AI Expert"
             report_text += f"{role}: {msg['content']}\n\n"
             
-        st.download_button(
+        # Download button with a Toast Notification
+        downloaded = st.download_button(
             label="📥 Download Daily Log",
             data=report_text,
             file_name="Agri_Report_Log.txt",
             mime="text/plain"
         )
+        
+        if downloaded:
+            st.toast('Report Downloaded Successfully! 🌾', icon='✅')
