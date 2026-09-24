@@ -1,0 +1,43 @@
+/* =========================================
+   Smart Agri Console - Custom Styling
+   ========================================= */
+
+/* Chat Messages Animation */
+.stChatMessage {
+    animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+@keyframes fadeIn {
+    from { 
+        opacity: 0; 
+        transform: translateY(20px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
+}
+
+/* Button Hover Effects */
+.stButton > button {
+    transition: all 0.3s ease-in-out;
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.stButton > button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(14, 165, 233, 0.2);
+    border-color: #0ea5e9;
+    color: #0ea5e9;
+}
+
+/* Hide Default Streamlit Menu & Footer for a App-like feel */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
